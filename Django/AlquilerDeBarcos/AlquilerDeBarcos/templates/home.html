@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inicio - Alquiler de Barcos</title>
+</head>
+<body>
+    <h1>Bienvenidos a Alquiler de Barcos</h1>
+    <p>Explora nuestra amplia variedad de barcos disponibles para alquilar y disfruta de una experiencia única en el mar.</p>
+    
+    <nav>
+        <ul>
+            <li><a href="{% url 'catalogo_barcos' %}">Catálogo de Barcos</a></li>
+            <li><a href="{% url 'registro_usuario' %}">Registrarse</a></li>
+            <li><a href="{% url 'login' %}">Iniciar Sesión</a></li>
+        </ul>
+    </nav>
+</body>
+</html>
