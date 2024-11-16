@@ -7,10 +7,10 @@
 
     <!-- ============================ COMPONENT 1 ================================= -->
     {% if not cart_items %}
-      <h3 class="text-center">¡Parece que no has agregado nada aún! Añade productos de tu interés al carrito.</h3>
+      <h3 class="text-center">¡Parece que no has agregado nada aún!</h3>
       <br>
       <div class="text-center">
-        <a href="{% url 'store' %}" class="btn btn-primary">Continuar Comprando</a>
+        <a href="{% url 'store' %}" class="btn btn-primary">Ir al catálogo</a>
       </div>
     {% else %}
     <div class="row">
@@ -19,7 +19,7 @@
     <table class="table table-borderless table-shopping-cart">
     <thead class="text-muted">
     <tr class="small text-uppercase">
-      <th scope="col">Producto(s)</th>
+      <th scope="col">Embarcación(es)</th>
       <th scope="col" width="120">Cantidad</th>
       <th scope="col" width="120">Precio</th>
       <th scope="col" class="text-right" width="200"> </th>
