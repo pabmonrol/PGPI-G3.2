@@ -37,32 +37,7 @@
 
               <p>{{ single_product.description }}</p>
 
-              <hr>
-              <div class="row">
-                <div class="item-option-select">
-                  <h6>Escoge el color</h6>
-                  <select class="form-control" name="color" required>
-                    <option value="" disabled selected>Seleccionar</option>
-                      {% for i in single_product.variation_set.colors %}
-                      <option value="{{ i.variation_value | lower }}">{{ i.variation_value | capfirst }}</option>
-                      {% endfor %}
-                  </select>
-                </div>
-              </div> <!-- row.// -->
-              <div class="row">
-                <div class="item-option-select">
-
-                  <h6>Escoge la tallas</h6>
-                  <select class="form-control" name="talla" required>
-                    <option value="" disabled selected>Seleccionar</option>
-                      {% for i in single_product.variation_set.tallas %}
-                      <option value="{{ i.variation_value | lower }}">{{ i.variation_value | capfirst }}</option>
-                      {% endfor %}
-                  </select>
-
-                </div>
-              </div> <!-- row.// -->
-              <hr>
+          
 
               {% if single_product.stock <= 0 %}
               <h5>Lo lamentamos, este es un producto fuera de stock</h5>
