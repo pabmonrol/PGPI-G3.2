@@ -37,7 +37,12 @@
 
               <p>{{ single_product.description }}</p>
 
-          
+              <ul class="list-unstyled">
+                <li><strong>Puerto:</strong> {{ single_product.puerto }}</li>
+                <li><strong>Capacidad:</strong> {{ single_product.capacidad }} personas</li>
+                <li><strong>Fabricante:</strong> {{ single_product.fabricante }}</li>
+                <li><strong>Categoría:</strong> {{ single_product.category.category_name }}</li>
+              </ul>
 
               {% if single_product.stock <= 0 %}
               <h5>Lo lamentamos, este es un producto fuera de stock</h5>
