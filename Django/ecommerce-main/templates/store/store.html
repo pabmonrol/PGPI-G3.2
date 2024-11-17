@@ -142,6 +142,38 @@
               </div>
               
 
+              <header class="card-header">
+                <a href="#" data-toggle="collapse" data-target="#collapse_6" aria-expanded="true" class="">
+                  <i class="icon-control fa fa-chevron-down"></i>
+                  <h6 class="title">Capacidad</h6>
+                </a>
+              </header>
+              <div class="filter-content collapse show" id="collapse_6" style="">
+                <div class="card-body">
+                  <label class="checkbox-btn">
+                    <input type="checkbox" name="capacidad" value="2" {% if '2' in request.GET.capacidad  %}checked{% endif %}>
+                    <span class="btn btn-light"> 2 personas </span>
+                  </label>
+
+                  <label class="checkbox-btn">
+                    <input type="checkbox" name="capacidad" value="4" {% if '4' in request.GET.capacidad %}checked{% endif %}>
+                    <span class="btn btn-light"> 4 personas </span>
+                  </label>
+
+                  <label class="checkbox-btn">
+                    <input type="checkbox" name="capacidad" value="6" {% if '6' in request.GET.capacidad %}checked{% endif %}>
+                    <span class="btn btn-light"> 6 personas </span>
+                  </label>
+
+                  <label class="checkbox-btn">
+                    <input type="checkbox" name="capacidad" value="8" {% if '8' in request.GET.capacidad %}checked{% endif %}>
+                    <span class="btn btn-light"> 8 personas </span>
+                  </label>
+
+
+                </div><!-- card-body.// -->
+              </div>
+
 
               <button type="submit" class="btn btn-primary">Filtrar</button>
             </form>

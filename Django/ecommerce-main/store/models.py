@@ -19,6 +19,7 @@ class Product(models.Model):
     modified_date = models.DateTimeField(auto_now=True)
     fabricante = models.CharField(max_length=100, default='Rodman')
     puerto = models.CharField(max_length=100, default='Santa Maria')
+    capacidad = models.IntegerField(default=4)
 
     def get_url(self):
         return reverse('product_detail', args=[self.category.slug, self.slug])

@@ -37,6 +37,11 @@ def store(request, category_slug=None):
     if min_price and max_price:
         products = products.filter(price__gte=min_price, price__lte=max_price)
 
+    # Filtrar por capacidad
+    capacidades = request.GET.getlist('capacidad')
+    if capacidades:
+        products = products.filter(capacidad__in=capacidades)
+
     paginator = Paginator(products, 6)
     page = request.GET.get('page')
     paged_products = paginator.get_page(page)
