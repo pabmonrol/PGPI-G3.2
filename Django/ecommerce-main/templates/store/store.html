@@ -129,32 +129,48 @@
           {% if products %}
           {% for product in products %}
           <div class="col-md-4">
-            <figure class="card card-product-grid">
-              <div class="img-wrap">
-
-
-                <a href="{{ product.get_url }}"><img src="{{ product.images.url }}"></a>
-
-              </div> <!-- img-wrap.// -->
-              <figcaption class="info-wrap">
-                <div class="fix-height">
-                  <a href="{{ product.get_url }}" class="title">{{product.product_name}}</a>
-                  <div class="price-wrap mt-2">
-                    <span class="price">{{ product.price }}€/día</span>
-                  </div> <!-- price-wrap.// -->
-                </div>
-                <a href="{% url 'add_cart' product.id %}" class="btn btn-block btn-success">Agregar al Carrito </a>
-              </figcaption>
-            </figure>
+              <figure class="card card-product-grid">
+                  <div class="img-wrap">
+                      <img src="{{ product.images.url }}">
+                      {% if not product.is_available %}
+                      <div class="overlay">
+                          <span class="badge badge-danger">No disponible</span>
+                      </div>
+                      {% endif %}
+                  </div> <!-- img-wrap.// -->
+                  <figcaption class="info-wrap">
+                      <div class="fix-height">
+                          <a 
+                              {% if product.is_available %}
+                              href="{{ product.get_url }}" 
+                              {% else %}
+                              class="text-muted disabled-link"
+                              {% endif %}
+                              class="title">{{ product.product_name }}</a>
+                          <div class="price-wrap mt-2">
+                              <span class="price">{{ product.price }}€/día</span>
+                          </div> <!-- price-wrap.// -->
+                      </div>
+                      <a 
+                          {% if product.is_available %}
+                          href="{% url 'add_cart' product.id %}" class="btn btn-block btn-success"
+                          {% else %}
+                          class="btn btn-block btn-secondary disabled-link"
+                          {% endif %}
+                      >
+                          {% if product.is_available %}Agregar al Carrito{% else %}No disponible{% endif %}
+                      </a>
+                  </figcaption>
+              </figure>
           </div> <!-- col.// -->
           {% endfor %}
           {% else %}
-          <div style="text-align: center; color: darkgray; font-size: small;">
+          <div class="col-12 text-center text-muted">
               <h2>No se han encontrado resultados para tu búsqueda</h2>
           </div>
           {% endif %}
-
-        </div> <!-- row end.// -->
+      </div>
+      
 
 
         <nav class="mt-4" aria-label="Page navigation sample">

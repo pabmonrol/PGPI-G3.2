@@ -4,14 +4,15 @@
 {% block content %}
 <!-- ========================= SECTION MAIN ========================= -->
 <section class="section-intro padding-y-sm">
-<div class="container">
+	<div class="container">
+	
+	<div class="intro-banner-wrap">
+		<img src="media/images/banners/blackfriday.png" class="img-fluid rounded">
+	</div>
+	
+	</div> <!-- container //  -->
+	</section>
 
-<div class="intro-banner-wrap">
-	<img src="media/images/banners/blackfriday.png" class="img-fluid rounded">
-</div>
-
-</div> <!-- container //  -->
-</section>
 <!-- ========================= SECTION MAIN END// ========================= -->
 
 <!-- ========================= SECTION  ========================= -->
@@ -23,21 +24,30 @@
 	<h3 class="section-title">Los más populares</h3>
 </header><!-- sect-heading -->
 
-
 <div class="row">
-
 	{% for product in products %}
 	<div class="col-md-3">
 		<div class="card card-product-grid">
-			<a href="{{ product.get_url }}" class="img-wrap"> <img src="{{ product.images.url }}"> </a>
+            {% if product.is_available %}
+			<a href="{{ product.get_url }}" class="img-wrap"> 
+                <img src="{{ product.images.url }}"> 
+            </a>
+            {% else %}
+            <div class="img-wrap">
+                <img src="{{ product.images.url }}">
+                <div class="overlay">
+                    <span class="badge badge-danger">No disponible</span>
+                </div>
+            </div>
+            {% endif %}
 			<figcaption class="info-wrap">
 				<a href="{{ product.get_url }}" class="title">{{product.product_name}}</a>
-				<div class="price mt-1">{{ product.price }}€/día</div> <!-- price-wrap.// -->
-
+				<div class="price mt-1">{{ product.price }}€ por dia</div> <!-- price-wrap.// -->
 			</figcaption>
 		</div>
 	</div> <!-- col.// -->
 	{% endfor %}
+
 </div>
 </div><!-- container // -->
 </section>
