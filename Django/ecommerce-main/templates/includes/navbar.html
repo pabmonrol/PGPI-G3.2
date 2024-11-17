@@ -42,6 +42,9 @@
       </div>
     </div>  <!-- category-wrap.// -->
   </div> <!-- col.// -->
+  {% if user.is_authenticated and user.is_admin %}
+    <a href="{% url 'list_users' %}" class="btn btn-primary">Ver Usuarios</a>
+{% endif %}
   <a href="{% url 'store' %}" class="btn btn-outline-primary">Tienda</a>
   <div class="col-lg  col-md-6 col-sm-12 col">
 

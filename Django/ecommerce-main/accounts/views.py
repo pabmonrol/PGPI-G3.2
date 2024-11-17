@@ -3,7 +3,7 @@ from .forms import RegistrationForm, UserProfileForm, UserForm
 from .models import Account, UserProfile
 from orders.models import Order
 from django.contrib import messages, auth
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.sites.shortcuts import get_current_site
 from django.template.loader import render_to_string
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
@@ -13,6 +13,8 @@ from django.core.mail import EmailMessage
 from carts.views import _cart_id
 from carts.models import Cart, CartItem
 from django.core.exceptions import ValidationError
+from django.core.paginator import Paginator
+from django.contrib.auth.password_validation import validate_password
 import requests
 
 
@@ -235,8 +237,19 @@ def resetPassword(request):
     if request.method == 'POST':
         password = request.POST['password']
         confirm_password = request.POST['confirm_password']
+        
+        if password == confirm_password:            
+            # Validar la contraseña usando los validadores de Django
+            try:
+                validate_password(password)  # Lanza una excepción si no es válida
+            except ValidationError as e:
+                # Mostrar los errores de validación al usuario
+                for error in e.messages:
+                     messages.error(request, error)
+                return redirect('resetPassword')
 
-        if password == confirm_password:
+        
+
             uid = request.session.get('uid')
             user = Account.objects.get(pk=uid)
             user.set_password(password)
@@ -293,6 +306,14 @@ def change_password(request):
         user = Account.objects.get(username__exact=request.user.username)
 
         if new_password == confirm_password:
+            try:
+                validate_password(new_password)  # Lanza una excepción si no es válida
+            except ValidationError as e:
+                # Mostrar los errores de validación al usuario
+                for error in e.messages:
+                     messages.error(request, error)
+                return redirect('change_password')
+
             success = user.check_password(current_password)
             if success:
                 user.set_password(new_password)
@@ -308,3 +329,12 @@ def change_password(request):
             return redirect('change_password')
 
     return render(request, 'accounts/change_password.html')
+
+@login_required
+@user_passes_test(lambda u: u.is_admin)
+def list_users(request):
+    user_list = Account.objects.all()
+    paginator = Paginator(user_list, 10)  # 10 usuarios por página
+    page_number = request.GET.get('page')
+    users = paginator.get_page(page_number)
+    return render(request, 'list_users.html', {'users': users})
