@@ -44,8 +44,8 @@
                 <li><strong>Categoría:</strong> {{ single_product.category.category_name }}</li>
               </ul>
 
-              {% if single_product.stock <= 0 %}
-              <h5>Lo lamentamos, este es un producto fuera de stock</h5>
+              {% if single_product.stock <= 0 or not single_product.is_available %}
+              <h5>Lo lamentamos, este es un producto no está disponible</h5>
               {% else %}
 
               <button type="submit" class="btn  btn-primary"> <span class="text">Agregar al Carrito</span> <i class="fas fa-shopping-cart"></i>  </button>
