@@ -26,7 +26,7 @@
 <div class="row align-items-center">
   <div class="col-lg-2 col-md-3 col-6">
     <a href="{% url 'home' %}" class="brand-wrap">
-      <img class="logo" src="{% static './images/logo4.png' %}">
+      <img class="logo" src="{% static './images/logo02.jpg' %}">
     </a> <!-- brand-wrap.// -->
   </div>
   <div class="col-lg col-sm col-md col-6 flex-grow-0">
@@ -42,7 +42,10 @@
       </div>
     </div>  <!-- category-wrap.// -->
   </div> <!-- col.// -->
-  <a href="{% url 'store' %}" class="btn btn-outline-primary">Catálogo</a>
+  {% if user.is_authenticated and user.is_admin %}
+    <a href="{% url 'list_users' %}" class="btn btn-primary">Ver Usuarios</a>
+{% endif %}
+  <a href="{% url 'store' %}" class="btn btn-outline-primary">Tienda</a>
   <div class="col-lg  col-md-6 col-sm-12 col">
 
     <form action="{% url 'search' %}" class="search">
@@ -62,7 +65,7 @@
 
           {% if user.id is None %}
           <div class="widget-header">
-            <small class="title text-muted">¡Bienvenido a Hundidos!</small>
+            <small class="title text-muted">Bienvenido a ByteShop!</small>
             <div>
               <a href="{% url 'login' %}">Iniciar Sesión</a> <span class="dark-transp"> | </span>
               <a href="{% url 'register' %}"> Registrarse </a>

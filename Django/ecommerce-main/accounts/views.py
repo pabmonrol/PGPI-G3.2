@@ -3,7 +3,7 @@ from .forms import RegistrationForm, UserProfileForm, UserForm
 from .models import Account, UserProfile
 from orders.models import Order
 from django.contrib import messages, auth
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.sites.shortcuts import get_current_site
 from django.template.loader import render_to_string
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
@@ -12,6 +12,9 @@ from django.utils.encoding import force_bytes
 from django.core.mail import EmailMessage
 from carts.views import _cart_id
 from carts.models import Cart, CartItem
+from django.core.exceptions import ValidationError
+from django.core.paginator import Paginator
+from django.contrib.auth.password_validation import validate_password
 import requests
 
 
@@ -21,12 +24,15 @@ def register(request):
     if request.method == 'POST':
         form = RegistrationForm(request.POST)
         if form.is_valid():
+            # Obtener datos del formulario
             first_name = form.cleaned_data['first_name']
             last_name = form.cleaned_data['last_name']
             phone_number = form.cleaned_data['phone_number']
             email = form.cleaned_data['email']
             password = form.cleaned_data['password']
-            username = email.split("@")[0]  # FALTA PHONE NUMBEEEEEEEEEEEEEEEER
+            username = email.split("@")[0]  
+            
+            # Crear usuario solo si la contraseña es válida
             user = Account.objects.create_user(first_name=first_name, last_name=last_name, email=email, username=username, password=password)
             user.phone_number = phone_number
             user.save()
@@ -36,29 +42,25 @@ def register(request):
             profile.profile_picture = 'default/default-user.png'
             profile.save()
 
-
+            # Enviar el correo de activación
             current_site = get_current_site(request)
             mail_subject = 'Activa tu cuenta en ByteShop para continuar'
             body = render_to_string('accounts/account_verification_email.html', {
                 'user': user,
                 'domain': current_site,
-                'uid': urlsafe_base64_encode( force_bytes(user.pk)),
+                'uid': urlsafe_base64_encode(force_bytes(user.pk)),
                 'token': default_token_generator.make_token(user),
             })
             to_email = email
             send_email = EmailMessage(mail_subject, body, to=[to_email])
             send_email.send()
 
-
-            # messages.success(request, 'Te has registrado exitosamente')
-            return redirect('/accounts/login/?command=verification&email='+email)
-
-
+            return redirect('/accounts/login/?command=verification&email=' + email)
 
     context = {
         'form': form
     }
-    return render(request, 'accounts/register.html', context)
+    return render(request, 'accounts/register.html', context)   
 
 
 def login(request):
@@ -121,8 +123,27 @@ def login(request):
                 return redirect('dashboard')
 
         else:
-            messages.error(request, 'Los datos son incorrectos')
-            return redirect('login')
+            new_user = Account.get_user_by_email(email)
+            if new_user is None:
+                messages.error(request, 'Los datos son incorrectos')
+                return redirect('login')
+            elif new_user.is_active:
+                messages.error(request, 'Los datos son incorrectos')
+                return redirect('login')
+            else:
+                current_site = get_current_site(request)
+                mail_subject = 'Activa tu cuenta en ByteShop para continuar'
+                body = render_to_string('accounts/account_verification_email.html', {
+                    'user': new_user,
+                    'domain': current_site,
+                    'uid': urlsafe_base64_encode( force_bytes(new_user.pk)),
+                    'token': default_token_generator.make_token(new_user),
+                })
+                to_email = email
+                send_email = EmailMessage(mail_subject, body, to=[to_email])
+                send_email.send()
+                # messages.success(request, 'Te has registrado exitosamente')
+                return redirect('/accounts/login/?command=verification&email='+email)
 
     return render(request, 'accounts/login.html')
 
@@ -216,8 +237,19 @@ def resetPassword(request):
     if request.method == 'POST':
         password = request.POST['password']
         confirm_password = request.POST['confirm_password']
+        
+        if password == confirm_password:            
+            # Validar la contraseña usando los validadores de Django
+            try:
+                validate_password(password)  # Lanza una excepción si no es válida
+            except ValidationError as e:
+                # Mostrar los errores de validación al usuario
+                for error in e.messages:
+                     messages.error(request, error)
+                return redirect('resetPassword')
 
-        if password == confirm_password:
+        
+
             uid = request.session.get('uid')
             user = Account.objects.get(pk=uid)
             user.set_password(password)
@@ -274,6 +306,14 @@ def change_password(request):
         user = Account.objects.get(username__exact=request.user.username)
 
         if new_password == confirm_password:
+            try:
+                validate_password(new_password)  # Lanza una excepción si no es válida
+            except ValidationError as e:
+                # Mostrar los errores de validación al usuario
+                for error in e.messages:
+                     messages.error(request, error)
+                return redirect('change_password')
+
             success = user.check_password(current_password)
             if success:
                 user.set_password(new_password)
@@ -289,3 +329,12 @@ def change_password(request):
             return redirect('change_password')
 
     return render(request, 'accounts/change_password.html')
+
+@login_required
+@user_passes_test(lambda u: u.is_admin)
+def list_users(request):
+    user_list = Account.objects.all()
+    paginator = Paginator(user_list, 10)  # 10 usuarios por página
+    page_number = request.GET.get('page')
+    users = paginator.get_page(page_number)
+    return render(request, 'list_users.html', {'users': users})
