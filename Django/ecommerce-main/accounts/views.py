@@ -44,7 +44,7 @@ def register(request):
 
             # Enviar el correo de activación
             current_site = get_current_site(request)
-            mail_subject = 'Activa tu cuenta en ByteShop para continuar'
+            mail_subject = 'Activa tu cuenta en Hundidos para continuar'
             body = render_to_string('accounts/account_verification_email.html', {
                 'user': user,
                 'domain': current_site,
@@ -132,7 +132,7 @@ def login(request):
                 return redirect('login')
             else:
                 current_site = get_current_site(request)
-                mail_subject = 'Activa tu cuenta en ByteShop para continuar'
+                mail_subject = 'Activa tu cuenta en Hundidos para continuar'
                 body = render_to_string('accounts/account_verification_email.html', {
                     'user': new_user,
                     'domain': current_site,
