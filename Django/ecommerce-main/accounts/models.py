@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from django.core.exceptions import ObjectDoesNotExist
 
 # Create your models here.
 class MyAccountManager(BaseUserManager):
@@ -76,6 +77,12 @@ class Account(AbstractBaseUser):
     def has_module_perms(self, add_label):
         return True
 
+    def get_user_by_email(email):
+        try:
+            usuario = Account.objects.get(email=email)
+            return usuario
+        except ObjectDoesNotExist:
+            return None
 
 class UserProfile(models.Model):
     user = models.OneToOneField(Account, on_delete=models.CASCADE)
