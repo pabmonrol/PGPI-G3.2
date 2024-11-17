@@ -185,7 +185,7 @@ def cart(request, total=0, quantity=0, cart_items=None):
             if not cart_item.product.category.slug == 'veleros': 
                 extra_combustible += 50  # Aplica una tasa extra de 50 a todos los barcos menos a los veleros
 
-        tax = round((16/100) * total, 2)
+        tax = round((21/100) * total, 2)
         grand_total = total + tax + extra_combustible
 
     except ObjectDoesNotExist:
@@ -207,6 +207,7 @@ def cart(request, total=0, quantity=0, cart_items=None):
 def checkout(request, total=0, quantity=0, cart_items=None):
     tax = 0
     grand_total = 0
+    extra_combustible = 0  # Nueva tasa extra
 
     try:
         if request.user.is_authenticated:
@@ -218,8 +219,11 @@ def checkout(request, total=0, quantity=0, cart_items=None):
         for cart_item in cart_items:
             total += (cart_item.product.price * cart_item.quantity)
             quantity += cart_item.quantity
-        tax = round((16/100) * total, 2)
-        grand_total = total + tax
+            if not cart_item.product.category.slug == 'veleros':
+                extra_combustible += 50  # Aplica una tasa extra de 50 a todos los barcos menos a los veleros
+
+        tax = round((21/100) * total, 2)
+        grand_total = total + tax + extra_combustible
 
     except ObjectDoesNotExist:
         pass
@@ -230,7 +234,7 @@ def checkout(request, total=0, quantity=0, cart_items=None):
         'cart_items': cart_items,
         'tax': tax,
         'grand_total': grand_total,
+        'extra_combustible': extra_combustible,  # Incluye la tasa extra en el contexto
     }
-
 
     return render(request, 'store/checkout.html', context)
