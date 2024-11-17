@@ -46,71 +46,109 @@
                 <h6 class="title">Puerto</h6>
               </a>
             </header>
-            <div class="filter-content collapse show" id="collapse_4" style="">
-              <div class="card-body">
-                <label class="checkbox-btn">
-                  <input type="checkbox">
-                  <span class="btn btn-light"> Bahía de Cádiz </span>
-                </label>
+            <form method="GET" action="{% url 'store' %}">
+              <div class="filter-content collapse show" id="collapse_4" style="">
+                <div class="card-body">
+                  <label class="checkbox-btn">
+                    <input type="checkbox" name="puerto" value="Santa Maria" {% if 'Santa Maria' in request.GET.puerto %}checked{% endif %}>
+                    <span class="btn btn-light"> Santa Maria </span>
+                  </label>
 
-                <label class="checkbox-btn">
-                  <input type="checkbox">
-                  <span class="btn btn-light"> Algeciras </span>
-                </label>
+                  <label class="checkbox-btn">
+                    <input type="checkbox" name="puerto" value="Bahía de Cádiz" {% if 'Bahía de Cádiz' in request.GET.puerto %}checked{% endif %}>
+                    <span class="btn btn-light"> Bahía de Cádiz </span>
+                  </label>
 
-                <label class="checkbox-btn">
-                  <input type="checkbox">
-                  <span class="btn btn-light"> Tarifa </span>
-                </label>
+                  <label class="checkbox-btn">
+                    <input type="checkbox" name="puerto" value="Algeciras" {% if 'Algeciras' in request.GET.puerto %}checked{% endif %}>
+                    <span class="btn btn-light"> Algeciras </span>
+                  </label>
 
-                <label class="checkbox-btn">
-                  <input type="checkbox">
-                  <span class="btn btn-light"> Barbate </span>
-                </label>
-              </div><!-- card-body.// -->
-            </div>
+                  <label class="checkbox-btn">
+                    <input type="checkbox" name="puerto" value="Tarifa" {% if 'Tarifa' in request.GET.puerto %}checked{% endif %}>
+                    <span class="btn btn-light"> Tarifa </span>
+                  </label>
+
+                  <label class="checkbox-btn">
+                    <input type="checkbox" name="puerto" value="Barbate" {% if 'Barbate' in request.GET.puerto %}checked{% endif %}>
+                    <span class="btn btn-light"> Barbate </span>
+                  </label>
+                </div><!-- card-body.// -->
+              </div>
+
+              <header class="card-header">
+                <a href="#" data-toggle="collapse" data-target="#collapse_5" aria-expanded="true" class="">
+                  <i class="icon-control fa fa-chevron-down"></i>
+                  <h6 class="title">Fabricante</h6>
+                </a>
+              </header>
+              <div class="filter-content collapse show" id="collapse_5" style="">
+                <div class="card-body">
+                  <label class="checkbox-btn">
+                    <input type="checkbox" name="fabricante" value="Rodman" {% if 'Rodman' in request.GET.fabricante  %}checked{% endif %}>
+                    <span class="btn btn-light"> Rodman </span>
+                  </label>
+
+                  <label class="checkbox-btn">
+                    <input type="checkbox" name="fabricante" value="Beneteau" {% if 'Beneteau' in request.GET.fabricante %}checked{% endif %}>
+                    <span class="btn btn-light"> Beneteau </span>
+                  </label>
+
+                  <label class="checkbox-btn">
+                    <input type="checkbox" name="fabricante" value="Jeanneau" {% if 'Jeanneau' in request.GET.fabricante %}checked{% endif %}>
+                    <span class="btn btn-light"> Jeanneau </span>
+                  </label>
+                </div><!-- card-body.// -->
+              </div>
+
+
+              <header class="card-header">
+                <a href="#" data-toggle="collapse" data-target="#collapse_3" aria-expanded="true" class="">
+                  <i class="icon-control fa fa-chevron-down"></i>
+                  <h6 class="title">Precios </h6>
+                </a>
+              </header>
+              <div class="filter-content collapse show" id="collapse_3" style="">
+                <div class="card-body">
+  
+                  <div class="form-row">
+                    <div class="form-group col-md-6">
+                      <label>Precio Mínimo</label>
+                      <!-- <input class="form-control" placeholder="0€" type="number"> -->
+                      <select class="mr-2 form-control" name="min_price">
+                        <option value="0" {% if request.GET.min_price == "0" %}selected{% endif %}>0€</option>
+                        <option value="50" {% if request.GET.min_price == "50" %}selected{% endif %}>50€</option>
+                        <option value="100" {% if request.GET.min_price == "100" %}selected{% endif %}>100€</option>
+                        <option value="150" {% if request.GET.min_price == "150" %}selected{% endif %}>150€</option>
+                        <option value="200" {% if request.GET.min_price == "200" %}selected{% endif %}>200€</option>
+                        <option value="500" {% if request.GET.min_price == "500" %}selected{% endif %}>500€</option>
+                        <option value="1000" {% if request.GET.min_price == "1000" %}selected{% endif %}>1000€</option>
+                      </select>
+                    </div>
+                    <div class="form-group text-right col-md-6">
+                      <label>Precio Máximo</label>
+                      <select class="mr-2 form-control" name="max_price">
+                        <option value="50" {% if request.GET.max_price == "50" %}selected{% endif %}>50€</option>
+                        <option value="100" {% if request.GET.max_price == "100" %}selected{% endif %}>100€</option>
+                        <option value="150" {% if request.GET.max_price == "150" %}selected{% endif %}>150€</option>
+                        <option value="200" {% if request.GET.max_price == "200" %}selected{% endif %}>200€</option>
+                        <option value="500" {% if request.GET.max_price == "500" %}selected{% endif %}>500€</option>
+                        <option value="1000" {% if request.GET.max_price == "1000" %}selected{% endif %}>1000€</option>
+                        <option value="2000" {% if request.GET.max_price == "2000" %}selected{% endif %}>2000€+</option>
+                      </select>
+                    </div>
+                  </div> <!-- form-row.// -->
+                </div><!-- card-body.// -->
+              </div>
+              
+
+
+              <button type="submit" class="btn btn-primary">Filtrar</button>
+            </form>
           </article> <!-- filter-group .// -->
 
           <article class="filter-group">
-            <header class="card-header">
-              <a href="#" data-toggle="collapse" data-target="#collapse_3" aria-expanded="true" class="">
-                <i class="icon-control fa fa-chevron-down"></i>
-                <h6 class="title">Precios </h6>
-              </a>
-            </header>
-            <div class="filter-content collapse show" id="collapse_3" style="">
-              <div class="card-body">
 
-                <div class="form-row">
-                  <div class="form-group col-md-6">
-                    <label>Min</label>
-                    <!-- <input class="form-control" placeholder="0€" type="number"> -->
-                    <select class="mr-2 form-control">
-                      <option value="0">0€</option>
-                      <option value="50">50€</option>
-                      <option value="100">100€</option>
-                      <option value="150">150€</option>
-                      <option value="200">200€</option>
-                      <option value="500">500€</option>
-                      <option value="1000">1000€</option>
-                    </select>
-                  </div>
-                  <div class="form-group text-right col-md-6">
-                    <label>Max</label>
-                    <select class="mr-2 form-control">
-                      <option value="50">50€</option>
-                      <option value="100">100€</option>
-                      <option value="150">150€</option>
-                      <option value="200">200€</option>
-                      <option value="500">500€</option>
-                      <option value="1000">1000€</option>
-                      <option value="2000">2000€+</option>
-                    </select>
-                  </div>
-                </div> <!-- form-row.// -->
-                <button class="btn btn-block btn-primary">Buscar</button>
-              </div><!-- card-body.// -->
-            </div>
           </article> <!-- filter-group .// -->
 
         </div> <!-- card.// -->
