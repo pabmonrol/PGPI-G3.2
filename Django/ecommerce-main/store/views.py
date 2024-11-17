@@ -106,3 +106,14 @@ def submit_review(request, product_id):
                 data.save()
                 messages.success(request, 'Muchas gracias!, tu comentario ha sido publicado.')
                 return redirect(url)
+            
+def update_hours(request, product_id):
+    if request.method == "POST":
+        cart_item = get_object_or_404(CartItem, product__id=product_id, user=request.user)
+        hours = int(request.POST.get('hours', cart_item.hours))
+        if 'increment' in request.POST:
+            cart_item.hours = hours + 1
+        elif 'decrement' in request.POST and hours > 1:
+            cart_item.hours = hours - 1
+        cart_item.save()
+    return redirect('cart')
