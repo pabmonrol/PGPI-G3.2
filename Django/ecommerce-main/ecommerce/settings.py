@@ -34,7 +34,8 @@ DEFAULT_FROM_EMAIL = 'hundidosgestion@gmail.com'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['pgpi-g3-2.onrender.com']
+
 
 
 # Application definition
