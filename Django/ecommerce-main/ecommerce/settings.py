@@ -34,7 +34,7 @@ DEFAULT_FROM_EMAIL = 'hundidosgestion@gmail.com'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['pgpi-g3-2.onrender.com']
+ALLOWED_HOSTS = ['pgpi-g3-2.onrender.com','127.0.0.1']
 
 
 
@@ -75,7 +75,7 @@ ROOT_URLCONF = 'ecommerce.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ['templates'],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
