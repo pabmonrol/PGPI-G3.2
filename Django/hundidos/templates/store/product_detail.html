@@ -16,9 +16,6 @@
           <ul class="thumb">
             <li>
               <a href="{{ single_product.images.url }}" target="mainImage"><img src="{{ single_product.images.url }}" alt="Imagen del Producto"></a>
-              {% for i in product_gallery %}
-                <a href="{{ i.image.url }}" target="mainImage"><img src="{{ i.image.url }}" alt="Imagen del Producto"></a>
-              {% endfor %}
             </li>
           </ul>
         </aside>
@@ -66,3 +63,6 @@
 </section>
 {% endblock %}
 <!-- ========================= SECTION CONTENT END// ========================= -->
+              <!-- {% for i in product_gallery %}
+                <a href="{{ i.image.url }}" target="mainImage"><img src="{{ i.image.url }}" alt="Imagen del Producto"></a>
+              {% endfor %} -->
