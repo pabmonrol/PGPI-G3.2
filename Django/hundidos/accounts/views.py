@@ -112,15 +112,7 @@ def login(request):
             auth.login(request, user)
             messages.success(request, 'Has iniciado sesión exitosamente')
 
-            url = request.META.get('HTTP_REFERER')
-            try:
-                query = requests.utils.urlparse(url).query
-                params = dict(x.split('=') for x in query.split('&'))
-                if 'next' in params:
-                    nextPage = params['next']
-                    return redirect(nextPage)
-            except:
-                return redirect('dashboard')
+            return redirect('home')
 
         else:
             new_user = Account.get_user_by_email(email)
