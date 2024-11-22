@@ -1,9 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from store.models import Product, Variation
 from .models import Cart, CartItem
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.contrib.auth.decorators import login_required
-from datetime import datetime
+from datetime import datetime, date
 from django.contrib import messages
 
 # Create your views here.
@@ -12,7 +12,6 @@ def _cart_id(request):
     if not cart:
         cart = request.session.create()
     return cart
-
 
 def add_cart(request, product_id):
     product = Product.objects.get(id=product_id)
@@ -163,6 +162,19 @@ def checkout(request, total=0, duracion=0, cart_items=None):
             cart_items = CartItem.objects.filter(cart=cart, is_active=True)
 
         for cart_item in cart_items:
+            # Validar que las fechas no se solapen con otras reservas existentes
+            reservas_solapadas = CartItem.objects.filter(
+                product=cart_item.product,
+                fecha_inicio__lte=cart_item.fecha_fin,
+                fecha_fin__gte=cart_item.fecha_inicio,
+                is_active=True
+            ).exclude(id=cart_item.id)
+
+            if reservas_solapadas.exists():
+                solapado_item = reservas_solapadas.first()
+                messages.error(request, f'El producto {solapado_item.product.product_name} ya está reservado en las fechas seleccionadas.')
+                return redirect('cart')
+
             duracion = (cart_item.fecha_fin - cart_item.fecha_inicio).days
             total += (cart_item.product.price * duracion)
             if cart_item.product.category.slug != 'veleros':
@@ -192,9 +204,27 @@ def update_cart(request):
             end_date = request.POST.get(f'end_date_{item_id}')
             cart_item = CartItem.objects.get(id=item_id)
             
+            # Validar que la fecha de inicio sea posterior al día de hoy
+            if datetime.strptime(start_date, '%Y-%m-%d').date() <= date.today():
+                messages.error(request, 'La fecha de inicio debe ser posterior al día de hoy.')
+                return redirect('cart')
+            
             # Validar que la fecha de inicio sea anterior a la fecha de fin
             if datetime.strptime(start_date, '%Y-%m-%d') >= datetime.strptime(end_date, '%Y-%m-%d'):
                 messages.error(request, 'La fecha de inicio debe ser anterior a la fecha de fin.')
+                return redirect('cart')
+            
+            # Validar que las fechas no se solapen con otras reservas existentes
+            reservas_solapadas = CartItem.objects.filter(
+                product=cart_item.product,
+                fecha_inicio__lte=datetime.strptime(end_date, '%Y-%m-%d'),
+                fecha_fin__gte=datetime.strptime(start_date, '%Y-%m-%d'),
+                is_active=True
+            ).exclude(id=cart_item.id)
+
+            if reservas_solapadas.exists():
+                solapado_item = reservas_solapadas.first()
+                messages.error(request, f'El producto {solapado_item.product.product_name} ya está reservado en las fechas seleccionadas.')
                 return redirect('cart')
             
             cart_item.fecha_inicio = datetime.strptime(start_date, '%Y-%m-%d')

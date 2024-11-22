@@ -71,31 +71,21 @@ def product_detail(request, category_slug, product_slug):
     except Exception as e:
         raise e
 
-    if request.user.is_authenticated:
-        try:
-            orderproduct = OrderProduct.objects.filter(user=request.user, product__id=single_product.id).exists()
-        except OrderProduct.DoesNotExist:
-            orderproduct = None
-    else:
-        orderproduct = None
-
-    # Obtener fechas ocupadas
     reservas = OrderProduct.objects.filter(product=single_product, ordered=True)
-    fechas_ocupadas = []
+    eventos = []
     for reserva in reservas:
-        rango = (reserva.fecha_inicio + timedelta(days=i) for i in range((reserva.fecha_fin - reserva.fecha_inicio).days + 1))
-        fechas_ocupadas.extend([fecha.strftime('%Y-%m-%d') for fecha in rango])
-
-    reviews = ReviewRating.objects.filter(product__id=single_product.id, status=True)
-    product_gallery = ProductGallery.objects.filter(product_id=single_product.id)
+        eventos.append({
+            'title': f'Ocupado',  # Texto que aparecerá en el calendario
+            'start': reserva.fecha_inicio.strftime('%Y-%m-%d'),  # Fecha inicio
+            'end': (reserva.fecha_fin + timedelta(days=1)).strftime('%Y-%m-%d'),  # Fecha fin + 1 día
+            'backgroundColor': 'red',  # Color del evento
+            'borderColor': 'darkred',
+        })
 
     context = {
         'single_product': single_product,
         'in_cart': in_cart,
-        'orderproduct': orderproduct,
-        'reviews': reviews,
-        'product_gallery': product_gallery,
-        'fechas_ocupadas': fechas_ocupadas,  # Enviamos las fechas ocupadas al template
+        'eventos_json': eventos,  # Enviamos los eventos en formato JSON
     }
 
     return render(request, 'store/product_detail.html', context)
@@ -112,7 +102,6 @@ def search(request):
     }
 
     return render(request, 'store/store.html', context)
-
 
 def submit_review(request, product_id):
     url = request.META.get('HTTP_REFERER')

@@ -96,7 +96,7 @@ class OrderProduct(models.Model):
             product=self.product,
             fecha_inicio__lte=self.fecha_fin,
             fecha_fin__gte=self.fecha_inicio,
-            ordered=True  # Solo verificar productos reservados
+            ordered=True
         ).exclude(pk=self.pk)
 
         if reservas_solapadas.exists():

@@ -39,12 +39,8 @@
                 <li><strong>Categoría:</strong> {{ single_product.category.category_name }}</li>
               </ul>
 
-              <h5>Fechas no disponibles:</h5>
-              <ul>
-                {% for fecha in fechas_ocupadas %}
-                <li>{{ fecha }}</li>
-                {% endfor %}
-              </ul>
+              <h5>Calendario de disponibilidad</h5>
+              <div id="calendar"></div> 
 
               {% if single_product.stock <= 0 or not single_product.is_available %}
               <h5>Lo lamentamos, este producto no está disponible</h5>
@@ -59,6 +55,23 @@
     </div>
   </div>
 </section>
+<!-- FullCalendar -->
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var calendarEl = document.getElementById('calendar');
+
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+      initialView: 'dayGridMonth',
+      locale: 'es', // Cambia el idioma a español
+      events: {{ eventos_json|safe }} // Datos de los eventos desde el contexto
+    });
+
+    calendar.render();
+  });
+</script>
+
 {% endblock %}
 
 <!-- Agrega FullCalendar y configura las fechas -->
