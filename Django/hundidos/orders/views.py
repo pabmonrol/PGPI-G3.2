@@ -72,7 +72,7 @@ def payments(request):
 
 
 # Create your views here.
-def place_order(request, total=0, quantity=0):
+def place_order(request, total=0, duracion=0):
     current_user = request.user
     cart_items = CartItem.objects.filter(user=current_user)
     cart_count = cart_items.count()
@@ -84,8 +84,9 @@ def place_order(request, total=0, quantity=0):
     tax = 0
 
     for cart_item in cart_items:
-        total += (cart_item.product.price * cart_item.quantity)
-        quantity += cart_item.quantity
+        duracion += cart_item.duracion
+        total += (cart_item.product.price * duracion)
+
 
     tax = round((16/100) * total, 2)
     grand_total = total + tax

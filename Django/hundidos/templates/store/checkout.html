@@ -92,7 +92,7 @@
               <thead class="text-muted">
               <tr class="small text-uppercase">
                 <th scope="col">Producto(s)</th>
-                <th scope="col" width="120">Cantidad</th>
+                <th scope="col" width="120">Dias</th>
                 <th scope="col" width="120">Precio</th>
 
               </tr>
@@ -119,13 +119,13 @@
                   </td>
                   <td>
 
-                    <label for="">{{ cart_item.quantity }}</label>
+                    <label for="">{{ cart_item.duracion }}</label>
 
                   </td>
                   <td>
                       <div class="price-wrap">
                           <var class="price">${{ cart_item.sub_total }}</var>
-                          <small class="text-muted"> ${{ cart_item.product.price }} cada uno </small>
+                          <small class="text-muted"> ${{ cart_item.product.price }} cada dia </small>
                       </div> <!-- price-wrap .// -->
                   </td>
 

@@ -4,15 +4,14 @@
 <section class="section-content padding-y bg">
   <div class="container">
 
-    <!-- ============================ COMPONENT 1 ================================= -->
     <div class="card">
       <div class="row no-gutters">
         <aside class="col-md-6">
           <article class="gallery-wrap">
             <div class="img-big-wrap mainImage">
               <center> <img src="{{ single_product.images.url }}"> </center>
-            </div> <!-- img-big-wrap.// -->
-          </article> <!-- gallery-wrap .end// -->
+            </div>
+          </article>
           <ul class="thumb">
             <li>
               <a href="{{ single_product.images.url }}" target="mainImage"><img src="{{ single_product.images.url }}" alt="Imagen del Producto"></a>
@@ -23,7 +22,6 @@
 
           <form action="{% url 'add_cart' single_product.id %}" method="POST">
             {% csrf_token %}
-
             <article class="content-body">
 
               <h2 class="title">{{ single_product.product_name }}</h2>
@@ -41,28 +39,55 @@
                 <li><strong>Categoría:</strong> {{ single_product.category.category_name }}</li>
               </ul>
 
+              <h5>Fechas no disponibles:</h5>
+              <ul>
+                {% for fecha in fechas_ocupadas %}
+                <li>{{ fecha }}</li>
+                {% endfor %}
+              </ul>
+
               {% if single_product.stock <= 0 or not single_product.is_available %}
               <h5>Lo lamentamos, este producto no está disponible</h5>
               {% else %}
-
-              <button type="submit" class="btn  btn-primary"> <span class="text">Agregar al Carrito</span> <i class="fas fa-shopping-cart"></i>  </button>
-
+              <button type="submit" class="btn btn-primary mt-3">Reservar</button>
               {% endif %}
 
-            </article> <!-- product-info-aside .// -->
-
+            </article>
           </form>
-
-        </main> <!-- col.// -->
-      </div> <!-- row.// -->
-    </div> <!-- card.// -->
-    <!-- ============================ COMPONENT 1 END .// ================================= -->
-
-
-  </div> <!-- container .//  -->
+        </main>
+      </div>
+    </div>
+  </div>
 </section>
 {% endblock %}
-<!-- ========================= SECTION CONTENT END// ========================= -->
-              <!-- {% for i in product_gallery %}
-                <a href="{{ i.image.url }}" target="mainImage"><img src="{{ i.image.url }}" alt="Imagen del Producto"></a>
-              {% endfor %} -->
+
+<!-- Agrega FullCalendar y configura las fechas -->
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const calendarEl = document.getElementById('calendar');
+    const calendar = new FullCalendar.Calendar(calendarEl, {
+      initialView: 'dayGridMonth',
+      locale: 'es',
+      selectable: true,
+      select: function (info) {
+        // Captura las fechas seleccionadas
+        document.getElementById('fecha_inicio').value = info.startStr;
+        document.getElementById('fecha_fin').value = info.endStr;
+      },
+      events: [
+        {% for fecha in fechas_ocupadas %}
+        {
+          title: 'Reservado',
+          start: '{{ fecha.start }}',
+          end: '{{ fecha.end }}',
+          color: 'red'
+        },
+        {% endfor %}
+      ],
+    });
+    calendar.render();
+  });
+</script>
+{% endblock %}

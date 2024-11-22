@@ -8,9 +8,9 @@ from django.db.models import Q
 from .forms import ReviewForm
 from django.contrib import messages
 from orders.models import OrderProduct
+from datetime import timedelta
 
 
-# Create your views here.
 def store(request, category_slug=None):
     categories = None
     products = None
@@ -79,11 +79,15 @@ def product_detail(request, category_slug, product_slug):
     else:
         orderproduct = None
 
+    # Obtener fechas ocupadas
+    reservas = OrderProduct.objects.filter(product=single_product, ordered=True)
+    fechas_ocupadas = []
+    for reserva in reservas:
+        rango = (reserva.fecha_inicio + timedelta(days=i) for i in range((reserva.fecha_fin - reserva.fecha_inicio).days + 1))
+        fechas_ocupadas.extend([fecha.strftime('%Y-%m-%d') for fecha in rango])
 
     reviews = ReviewRating.objects.filter(product__id=single_product.id, status=True)
-
     product_gallery = ProductGallery.objects.filter(product_id=single_product.id)
-
 
     context = {
         'single_product': single_product,
@@ -91,10 +95,10 @@ def product_detail(request, category_slug, product_slug):
         'orderproduct': orderproduct,
         'reviews': reviews,
         'product_gallery': product_gallery,
+        'fechas_ocupadas': fechas_ocupadas,  # Enviamos las fechas ocupadas al template
     }
 
     return render(request, 'store/product_detail.html', context)
-
 
 def search(request):
     if 'keyword' in request.GET:
