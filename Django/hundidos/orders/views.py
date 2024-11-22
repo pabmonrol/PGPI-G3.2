@@ -1,3 +1,5 @@
+import random
+import string
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from carts.models import CartItem
@@ -8,6 +10,12 @@ import json
 from store.models import Product
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
+from django.shortcuts import get_object_or_404
+
+
+def generate_random_code(length=10):
+    """Genera un codigo aleatorio (letras y números) para la orden."""
+    return ''.join(random.choices(string.ascii_letters + string.digits, k=length))
 
 
 def payments(request):
@@ -106,7 +114,11 @@ def place_order(request, total=0, quantity=0):
             data.country = form.cleaned_data['country']
             data.city = form.cleaned_data['city']
             data.state = form.cleaned_data['state']
-            data.order_note = form.cleaned_data['order_note']
+
+            # Generar un código aleatorio y asignarlo al campo order_note
+            random_code = generate_random_code()
+            data.order_note = random_code
+
             data.order_total = grand_total
             data.tax = tax
             data.ip = request.META.get('REMOTE_ADDR')
@@ -164,3 +176,19 @@ def order_complete(request):
 
     except(Payment.DoesNotExist, Order.DoesNotExist):
         return redirect('home')
+    
+
+def mark_pending(request, order_id):
+    """
+    Marca la orden como completada y redirige a la página de órdenes.
+    """
+    # Verifica que la orden existe y pertenece al usuario
+    order = get_object_or_404(Order, id=order_id, user=request.user, is_ordered=False)
+    
+    # Cambiar el estado a 'Completed'
+    order.status = 'Completed'
+    order.is_ordered = True  # Opcional: Marca la orden como procesada
+    order.save()
+
+    # Redirige a la vista de órdenes del usuario
+    return redirect('my_orders')

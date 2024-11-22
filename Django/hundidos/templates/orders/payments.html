@@ -9,16 +9,21 @@
     <div class="row">
         <aside class="col-lg-8">
     <div class="card">
-          <h5 class="card-header">Dirección de Facturación</h5>
+          <h5 class="card-header">Número de seguimiento: {{ order.order_note }}</h5>
           <div class="card-body">
-            <p class="card-text mb-0">{{ order.full_name }}</p>
-            <p class="card-text mb-0">{{ order.full_address }}</p>
+            <!-- CÓDIGO DE PEDIDO -->
+            <p class="card-text mb-0">FECHAS DE ALQUILER: </p>
+            <p class="card-text mb-0">PUERTO: </p>
+            <p class="card-text mb-0">NOMBRE: {{ order.full_name }}</p>
+            <p class="card-text mb-0">DIRECCION: {{ order.full_address }}</p>
             <p class="card-text mb-0">{{ order.country }}, {{ order.city }}, {{ order.state }}</p>
             <p class="card-text mb-0">{{ order.email }}</p>
             <p class="card-text mb-0">{{ order.phone }}</p>
+            <!-- 
             {% if order.order_note %}
                 <b>Detalles de la orden: </b> {{ order.order_note }}
-            {% endif %}
+            {% endif %} -->
+
           </div>
     </div> <!-- card.// -->
 
@@ -106,6 +111,7 @@
                 </p>
 
                 <div id="paypal-button-container"></div>
+                <a href="{% url 'mark_pending' order.id %}" class="btn btn-light btn-block">Reservar y pagar luego</a>
         
             </div> <!-- card-body.// -->
             </div> <!-- card.// -->
