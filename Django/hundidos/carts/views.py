@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from store.models import Product, Variation
 from .models import Cart, CartItem
+from accounts.models import UserProfile #Import de UserProfile
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.decorators import login_required
 
@@ -172,9 +173,13 @@ def cart(request, total=0, quantity=0, cart_items=None):
     tax = 0
     grand_total = 0
     extra_combustible = 0  # Nueva tasa extra
+    user_profile = None
+
     try:
         if request.user.is_authenticated:
             cart_items = CartItem.objects.filter(user=request.user, is_active=True)
+            # Obtener el perfil del usuario si existe
+            user_profile = UserProfile.objects.filter(user=request.user).first()
         else:
             cart = Cart.objects.get(cart_id=_cart_id(request))
             cart_items = CartItem.objects.filter(cart=cart, is_active=True)
@@ -198,6 +203,7 @@ def cart(request, total=0, quantity=0, cart_items=None):
         'tax': tax,
         'grand_total': grand_total,
         'extra_combustible': extra_combustible,  # Incluye la tasa extra en el contexto
+        'user_profile': user_profile, #Incluye el perfil del usuario (direccion, ciudad, cp, etc)
     }
 
     return render(request, 'store/cart.html', context)
