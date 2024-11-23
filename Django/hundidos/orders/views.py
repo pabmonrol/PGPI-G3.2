@@ -135,10 +135,22 @@ def place_order(request, total=0, quantity=0):
             data.order_number = order_number
             data.save()
 
+            # Extraer productos del carrito y pasarlos a la plantilla
             order = Order.objects.get(user=current_user, is_ordered=False, order_number=order_number)
+            order_products = [
+                {
+                    'product': item.product,
+                    'quantity': item.quantity,
+                    'price': item.product.price,
+                    'total': item.product.price * item.quantity
+                }
+                for item in cart_items
+            ]
+
             context = {
                 'order': order,
                 'cart_items': cart_items,
+                'order_products': order_products, # Envia la informacion de los productos
                 'total': total,
                 'tax': tax,
                 'grand_total': grand_total,
