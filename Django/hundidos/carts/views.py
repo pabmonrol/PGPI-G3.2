@@ -3,7 +3,7 @@ from store.models import Product, Variation
 from .models import Cart, CartItem
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.contrib.auth.decorators import login_required
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from django.contrib import messages
 
 # Create your views here.
@@ -217,15 +217,15 @@ def update_cart(request):
             # Validar que las fechas no se solapen con otras reservas existentes
             reservas_solapadas = CartItem.objects.filter(
                 product=cart_item.product,
-                fecha_inicio__lte=datetime.strptime(end_date, '%Y-%m-%d'),
-                fecha_fin__gte=datetime.strptime(start_date, '%Y-%m-%d'),
                 is_active=True
             ).exclude(id=cart_item.id)
 
-            if reservas_solapadas.exists():
-                solapado_item = reservas_solapadas.first()
-                messages.error(request, f'El producto {solapado_item.product.product_name} ya está reservado en las fechas seleccionadas.')
-                return redirect('cart')
+            for existing_item in reservas_solapadas:
+                # Verificar si hay solapamiento de fechas
+                if (datetime.strptime(start_date, '%Y-%m-%d').date() < existing_item.fecha_fin + timedelta(days=-1) and
+                    datetime.strptime(end_date, '%Y-%m-%d').date() > existing_item.fecha_inicio):
+                    messages.error(request, f'El producto {existing_item.product.product_name} ya está reservado en las fechas seleccionadas.')
+                    return redirect('cart')
             
             cart_item.fecha_inicio = datetime.strptime(start_date, '%Y-%m-%d')
             cart_item.fecha_fin = datetime.strptime(end_date, '%Y-%m-%d')
