@@ -177,16 +177,14 @@ def order_complete(request):
     except(Payment.DoesNotExist, Order.DoesNotExist):
         return redirect('home')
     
-
+# Marca como PENDIENTE DE PAGO si la reserva no se ha pagado (opcion contra reembolso) 
+# y redirige a la pagina de lista de ordenes
 def mark_pending(request, order_id):
-    """
-    Marca la orden como completada y redirige a la página de órdenes.
-    """
     # Verifica que la orden existe y pertenece al usuario
     order = get_object_or_404(Order, id=order_id, user=request.user, is_ordered=False)
     
-    # Cambiar el estado a 'Completed'
-    order.status = 'Completed'
+    # Cambiar el estado a 'Pendiente de pago'
+    order.status = 'Pendiente de pago'
     order.is_ordered = True  # Opcional: Marca la orden como procesada
     order.save()
 

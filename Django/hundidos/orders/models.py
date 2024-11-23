@@ -15,13 +15,11 @@ class Payment(models.Model):
     def __str__(self):
         return self.payment_id
 
-
+# Estados de una reserva: PAGADO o PENDIENTE DE PAGO
 class Order(models.Model):
     STATUS = (
-        ('New', 'Nuevo'),
-        ('Accepted', 'Aceptado'),
-        ('Completed', 'Completado'),
-        ('Cancelled', 'Cancelado'),
+        ('Pagado', 'Pagado'),
+        ('Pendiente de pago', 'Pendiente de pago'),
     )
 
 
