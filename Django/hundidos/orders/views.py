@@ -218,24 +218,27 @@ def order_complete(request):
 # Marca como PENDIENTE DE PAGO si la reserva no se ha pagado (opcion contra reembolso) 
 # y redirige a la pagina de lista de ordenes
 def mark_pending(request, order_id):
-    # Verifica que la orden existe y pertenece al usuario
-    order = get_object_or_404(Order, id=order_id, user=request.user, is_ordered=False)
+    # Verifica que la orden existe
+    order = get_object_or_404(Order, id=order_id, is_ordered=False)
     
     # Cambiar el estado a 'Pendiente de pago'
     order.status = 'Pendiente de pago'
     order.is_ordered = True  # Opcional: Marca la orden como procesada
     order.save()
-    # print(f"Ruta esperada: {os.path.join(settings.BASE_DIR, 'templates/orders/order_recieved_email.html')}")
+
     # Enviar correo al usuario con los detalles de la orden
     mail_subject = "Detalles de tu reserva - Codigo de Seguimiento"
     body = render_to_string('orders/order_recieved_email.html', {
-    'order': order,
-    'user': request.user,
+        'order': order,
+        'nombre': order.first_name,
     })
 
-    to_email = request.user.email
-    send_email = EmailMessage(mail_subject,body,to=[to_email])
+    to_email = order.email
+    send_email = EmailMessage(mail_subject, body, to=[to_email])
     send_email.send()
 
-    # Redirige a la vista de órdenes del usuario
-    return redirect('my_orders')
+    # Redirige a la vista de órdenes del usuario si está autenticado, de lo contrario redirige a la página de inicio
+    if request.user.is_authenticated:
+        return redirect('my_orders')
+    else:
+        return redirect('home')
