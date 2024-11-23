@@ -9,16 +9,15 @@
     <div class="row">
         <aside class="col-lg-8">
     <div class="card">
-          <h5 class="card-header">Número de seguimiento: {{ order.order_note }}</h5>
+          <h5 class="card-header">Mis datos personales</h5>
           <div class="card-body">
-            <!-- CÓDIGO DE PEDIDO -->
-            <p class="card-text mb-0">FECHAS DE ALQUILER: </p>
-            <p class="card-text mb-0">PUERTO: </p>
-            <p class="card-text mb-0">NOMBRE: {{ order.full_name }}</p>
-            <p class="card-text mb-0">DIRECCION: {{ order.full_address }}</p>
-            <p class="card-text mb-0">{{ order.country }}, {{ order.city }}, {{ order.state }}</p>
-            <p class="card-text mb-0">{{ order.email }}</p>
-            <p class="card-text mb-0">{{ order.phone }}</p>
+            <p class="card-text mb-0">Nombres y Apellidos: {{ order.full_name }}</p>
+            <p class="card-text mb-0">Dirección: {{ order.full_address }}</p>
+            <p class="card-text mb-0">Pais: {{ order.country }}</p>
+            <p class="card-text mb-0">Ciudad: {{ order.city }}</p>
+            <p class="card-text mb-0">CP: {{ order.state }}</p>
+            <p class="card-text mb-0">Email de contacto: {{ order.email }}</p>
+            <p class="card-text mb-0">Móvil: {{ order.phone }}</p>
             <!-- 
             {% if order.order_note %}
                 <b>Detalles de la orden: </b> {{ order.order_note }}
@@ -28,9 +27,13 @@
     </div> <!-- card.// -->
 
     <div class="card">
-          <h5 class="card-header">Método de Pago</h5>
+          <h5 class="card-header">Detalles de la Reserva</h5>
           <div class="card-body">
-            <p class="card-text">Paypal</p>
+            <!--<p class="card-text">Paypal</p>-->
+            <!-- Detalle de la orden (order.order_note) es utilizado como código de seguimiento -->
+            <p class="card-text mb-0">Código de Seguimiento: {{ order.order_note }}</p>
+            <p class="card-text mb-0">Fechas de alquiler: </p>
+            <p class="card-text mb-0">Puerto: </p>
           </div>
     </div> <!-- card.// -->
 
