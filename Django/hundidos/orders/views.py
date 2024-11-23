@@ -1,6 +1,5 @@
 import random
 import string
-from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from carts.models import CartItem
 from .forms import OrderForm
@@ -9,8 +8,11 @@ from .models import Order, Payment, OrderProduct
 import json
 from store.models import Product
 from django.core.mail import EmailMessage
+from django.shortcuts import render, redirect, get_object_or_404
 from django.template.loader import render_to_string
-from django.shortcuts import get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.conf import settings
+import os
 
 # Generar un codigo aleatorio de 7 letras y que empieza con RES
 def generate_random_code():
@@ -187,6 +189,17 @@ def mark_pending(request, order_id):
     order.status = 'Pendiente de pago'
     order.is_ordered = True  # Opcional: Marca la orden como procesada
     order.save()
+    # print(f"Ruta esperada: {os.path.join(settings.BASE_DIR, 'templates/orders/order_recieved_email.html')}")
+    # Enviar correo al usuario con los detalles de la orden
+    mail_subject = "Detalles de tu reserva - Codigo de Seguimiento"
+    body = render_to_string('orders/order_recieved_email.html', {
+    'order': order,
+    'user': request.user,
+    })
+
+    to_email = request.user.email
+    send_email = EmailMessage(mail_subject,body,to=[to_email])
+    send_email.send()
 
     # Redirige a la vista de órdenes del usuario
     return redirect('my_orders')
