@@ -12,11 +12,11 @@ from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
 from django.shortcuts import get_object_or_404
 
-
-def generate_random_code(length=10):
-    """Genera un codigo aleatorio (letras y números) para la orden."""
-    return ''.join(random.choices(string.ascii_letters + string.digits, k=length))
-
+# Generar un codigo aleatorio de 7 letras y que empieza con RES
+def generate_random_code():
+    prefix = "RES-"
+    random_part = ''.join(random.choices(string.digits + string.ascii_letters, k=4))
+    return prefix + random_part
 
 def payments(request):
     body = json.loads(request.body)
