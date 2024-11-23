@@ -13,6 +13,14 @@ from django.template.loader import render_to_string
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
 import os
+from store.models import Product, Variation
+from carts.models import CartItem, Cart
+from accounts.models import UserProfile
+from .forms import OrderForm
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.http import JsonResponse
 
 # Generar un codigo aleatorio de 7 letras y que empieza con RES
 def generate_random_code():
@@ -82,9 +90,20 @@ def payments(request):
 
 
 # Create your views here.
+def _cart_id(request):
+    cart = request.session.session_key
+    if not cart:
+        cart = request.session.create()
+    return cart
+
 def place_order(request, total=0, quantity=0):
-    current_user = request.user
-    cart_items = CartItem.objects.filter(user=current_user)
+    if request.user.is_authenticated:
+        current_user = request.user
+        cart_items = CartItem.objects.filter(user=current_user)
+    else:
+        cart = Cart.objects.get(cart_id=_cart_id(request))
+        cart_items = CartItem.objects.filter(cart=cart)
+
     cart_count = cart_items.count()
 
     if cart_count <= 0:
@@ -100,13 +119,16 @@ def place_order(request, total=0, quantity=0):
     tax = round((16/100) * total, 2)
     grand_total = total + tax
 
-
     if request.method == 'POST':
         form = OrderForm(request.POST)
 
         if form.is_valid():
             data = Order()
-            data.user = current_user
+            if request.user.is_authenticated:
+                data.user = current_user
+            else:
+                data.user = None  # Usuario no registrado
+
             data.first_name = form.cleaned_data['first_name']
             data.last_name = form.cleaned_data['last_name']
             data.phone = form.cleaned_data['phone']
@@ -114,29 +136,26 @@ def place_order(request, total=0, quantity=0):
             data.address_line_1 = form.cleaned_data['address_line_1']
             data.address_line_2 = form.cleaned_data['address_line_2']
             data.country = form.cleaned_data['country']
-            data.city = form.cleaned_data['city']
             data.state = form.cleaned_data['state']
-
-            # Generar un código aleatorio y asignarlo al campo order_note
+            data.city = form.cleaned_data['city']
             random_code = generate_random_code()
             data.order_note = random_code
-
             data.order_total = grand_total
             data.tax = tax
             data.ip = request.META.get('REMOTE_ADDR')
             data.save()
 
-            yr=int(datetime.date.today().strftime('%Y'))
-            mt=int(datetime.date.today().strftime('%m'))
-            dt=int(datetime.date.today().strftime('%d'))
-            d = datetime.date(yr,mt,dt)
-            current_date = d.strftime("%Y%m%d")
+            # Generar número de pedido
+            yr = int(datetime.date.today().strftime('%Y'))
+            dt = int(datetime.date.today().strftime('%d'))
+            mt = int(datetime.date.today().strftime('%m'))
+            d = datetime.date(yr, mt, dt)
+            current_date = d.strftime("%Y%m%d")  # 20231121
             order_number = current_date + str(data.id)
             data.order_number = order_number
             data.save()
 
-            # Extraer productos del carrito y pasarlos a la plantilla
-            order = Order.objects.get(user=current_user, is_ordered=False, order_number=order_number)
+            order = Order.objects.get(is_ordered=False, order_number=order_number)
             order_products = [
                 {
                     'product': item.product,
@@ -150,18 +169,23 @@ def place_order(request, total=0, quantity=0):
             context = {
                 'order': order,
                 'cart_items': cart_items,
-                'order_products': order_products, # Envia la informacion de los productos
+                'order_products': order_products,
                 'total': total,
                 'tax': tax,
                 'grand_total': grand_total,
             }
-
             return render(request, 'orders/payments.html', context)
+        else:
+            messages.error(request, 'Por favor, corrija los errores en el formulario.')
+            return redirect('checkout')
 
-    else:
-        return redirect('checkout')
-
-
+    context = {
+        'cart_items': cart_items,
+        'total': total,
+        'tax': tax,
+        'grand_total': grand_total,
+    }
+    return render(request, 'orders/place_order.html', context)
 
 def order_complete(request):
     order_number = request.GET.get('order_number')
