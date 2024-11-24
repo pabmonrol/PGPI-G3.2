@@ -96,7 +96,7 @@ def _cart_id(request):
         cart = request.session.create()
     return cart
 
-def place_order(request, total=0, quantity=0):
+def place_order(request, total=0, duracion=0):
     if request.user.is_authenticated:
         current_user = request.user
         cart_items = CartItem.objects.filter(user=current_user)
@@ -113,11 +113,12 @@ def place_order(request, total=0, quantity=0):
     tax = 0
 
     for cart_item in cart_items:
-        duracion += cart_item.duracion
-        total += (cart_item.product.price * duracion)
+        duracion += cart_item.duracion()  # Invoca el método
+        total += (cart_item.product.price * cart_item.duracion())  # Usa el resultado del método
 
 
-    tax = round((16/100) * total, 2)
+
+    tax = round((21/100) * total, 2)
     grand_total = total + tax
 
     if request.method == 'POST':
@@ -160,7 +161,7 @@ def place_order(request, total=0, quantity=0):
             order_products = [
                 {
                     'product': item.product,
-                    'quantity': item.quantity,
+                    'quantity': duracion,
                     'price': item.product.price,
                     'total': item.product.price * item.quantity
                 }
