@@ -16,9 +16,13 @@ class RegistrationForm(forms.ModelForm):
         'class': 'form-control',
     }))
 
+    is_admin = forms.BooleanField(
+        required=False,  # El checkbox no es obligatorio
+        label="¿Es administrador?",  # Texto del label
+    )
     class Meta:
         model = Account
-        fields = ['first_name', 'last_name', 'phone_number', 'email', 'password']
+        fields = ['first_name', 'last_name', 'phone_number', 'email', 'password', 'is_admin']
 
     def __init__(self, *args, **kwargs):
         super(RegistrationForm, self).__init__(*args, **kwargs)
@@ -28,18 +32,26 @@ class RegistrationForm(forms.ModelForm):
         self.fields['email'].widget.attrs['placeholder'] = 'Ingrese su email'
         for field in self.fields:
             self.fields[field].widget.attrs['class'] = 'form-control'
+        # Desactiva el campo de contraseña en el formulario si es edición
+        if self.instance and self.instance.pk:
+            self.fields['password'].widget.attrs['readonly'] = True
+            self.fields['password'].widget.attrs['value'] = self.instance.password
+            self.fields['confirm_password'].widget.attrs['readonly'] = True
+            self.fields['confirm_password'].widget.attrs['value'] = self.instance.password
 
     def clean_email(self):
         email = self.cleaned_data.get('email')
         email_validator = EmailValidator(message='Por favor, ingrese un correo electrónico válido.')
         username = email.split("@")[0]   
+        user = self.instance
         try:
             email_validator(email)
         except ValidationError:
             raise ValidationError('Por favor, ingrese un correo electrónico válido. ###@####.#')
         
         if Account.objects.filter(email=email).exists():
-            raise ValidationError('Ya existe una cuenta con este correo electrónico')
+            if email != user.email:
+                raise ValidationError('Ya existe una cuenta con este correo electrónico')
         elif Account.objects.filter(username=username).exists():
             raise ValidationError(f"El nombre de usuario '{username}' ya está en uso. Por favor, elija otro.")
         return email

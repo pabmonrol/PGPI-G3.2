@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="mb-0">Editar Reserva</h3>
+        </div>
+        <div class="card-body">
+            <!-- Muestra mensajes de éxito -->
+            {% if messages %}
+                <div class="alert alert-success">
+                    {% for message in messages %}
+                        <p>{{ message }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <!-- Formulario para editar el OrderProduct -->
+            <form method="POST">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="product">Producto</label>
+                    {{ form.product }}
+                    {% for error in form.product.errors %}
+                        <div class="text-danger">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="form-group">
+                    <label for="user">Usuario</label>
+                    {{ form.user }}
+                    {% for error in form.user.errors %}
+                        <div class="text-danger">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="form-group">
+                    <label for="fecha_inicio">Fecha de Inicio</label>
+                    {{ form.fecha_inicio }}
+                    {% for error in form.fecha_inicio.errors %}
+                        <div class="text-danger">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="form-group">
+                    <label for="fecha_fin">Fecha de Fin</label>
+                    {{ form.fecha_fin }}
+                    {% for error in form.fecha_fin.errors %}
+                        <div class="text-danger">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <!-- Botón de submit -->
+                <button type="submit" class="btn btn-primary">Actualizar Reserva</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
