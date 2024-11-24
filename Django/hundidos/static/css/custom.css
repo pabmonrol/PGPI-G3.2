@@ -56,3 +56,58 @@ ul.thumb li img {
   height: 80px;
   border: 1px solid grey;
 }
+
+/* Contenedor del checkbox */
+.checkbox-container {
+  display: flex; /* Utilizamos Flexbox */
+  align-items: center; /* Centra verticalmente */
+  justify-content: center; /* Centra horizontalmente */
+  margin: 15px 0; /* Espaciado superior e inferior */
+  font-size: 16px; /* Tamaño del texto */
+  font-family: Arial, sans-serif; /* Fuente */
+  color: #4a4a4a; /* Color del texto */
+  width: 100%; /* Asegura que ocupe todo el ancho disponible */
+}
+
+/* Oculta el checkbox predeterminado */
+.checkbox-container input[type="checkbox"] {
+  display: none; /* Oculta el checkbox original */
+}
+
+/* Estilo del checkbox personalizado */
+.checkbox-container label {
+  position: relative;
+  display: flex;
+  align-items: center; /* Centra verticalmente */
+  cursor: pointer;
+  padding-left: 30px; /* Espacio para el cuadrado del checkbox */
+  color: #4a4a4a;
+}
+
+/* Cuadrado del checkbox */
+.checkbox-container label::before {
+  content: ""; /* Agrega el cuadrado */
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%); /* Centra verticalmente el cuadrado */
+  width: 20px; /* Tamaño del cuadrado */
+  height: 20px;
+  border: 2px solid #007bff; /* Borde azul */
+  border-radius: 4px; /* Esquinas redondeadas */
+  background-color: #fff; /* Fondo blanco */
+  transition: background-color 0.3s, border-color 0.3s;
+}
+
+/* Estilo al estar marcado */
+.checkbox-container input[type="checkbox"]:checked + label::before {
+  background-color: #007bff; /* Azul de fondo al estar seleccionado */
+  border-color: #007bff;
+  content: "✓"; /* Marca de verificación */
+  color: white;
+  font-size: 14px; /* Tamaño de la marca */
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

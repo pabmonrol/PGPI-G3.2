@@ -9,6 +9,9 @@ from .forms import ReviewForm
 from django.contrib import messages
 from orders.models import OrderProduct
 from datetime import timedelta
+from django.core.paginator import Paginator
+from django.contrib.auth.decorators import login_required, user_passes_test
+from .forms import ProductForm
 
 
 def store(request, category_slug=None):
@@ -125,3 +128,65 @@ def submit_review(request, product_id):
                 data.save()
                 messages.success(request, 'Muchas gracias!, tu comentario ha sido publicado.')
                 return redirect(url)
+
+@login_required
+@user_passes_test(lambda u: u.is_admin)
+def product_list(request):
+    product_list = Product.objects.all()
+    paginator = Paginator(product_list, 10)  # 10 usuarios por página
+    page_number = request.GET.get('page')
+    products = paginator.get_page(page_number)
+    return render(request, 'product_list.html', {'products': products})
+
+@login_required
+@user_passes_test(lambda u: u.is_admin)
+def edit_ship(request, ship_id):
+    # Obtener el barco a editar
+    ship = get_object_or_404(Product, id=ship_id)
+    
+    # Verificar si el formulario fue enviado
+    if request.method == 'POST':
+        form = ProductForm(request.POST, request.FILES, instance=ship)
+        
+        if form.is_valid():
+            form.save()  # Guardar el barco editado
+            # Redirigir a la lista de barcos con un mensaje de éxito
+            return redirect('product_list')  # O la URL donde deseas redirigir después de la edición
+    else:
+        # Si no es un POST, llenar el formulario con los datos actuales del barco
+        form = ProductForm(instance=ship)
+    
+    return render(request, 'store/edit_ship.html', {'form': form, 'ship': ship})
+
+@login_required
+@user_passes_test(lambda u: u.is_admin)
+def delete_ship(request, ship_id):
+   # Obtener el usuario que queremos eliminar
+    ship = get_object_or_404(Product, id=ship_id)
+
+    # Si no tiene reservas, se elimina la cuenta
+    ship.delete()
+    messages.success(request, "Barco eliminado con éxito.")
+    # Redirigir a la lista de usuarios
+    return redirect('product_list')  # O cualquier otra página a la que desees redirigir
+
+
+@login_required
+@user_passes_test(lambda u: u.is_admin)
+def create_ship(request):
+    form = ProductForm()
+
+    # Agregar clases CSS a los campos del formulario
+    form.fields['product_name'].widget.attrs['class'] = 'form-control'
+    form.fields['description'].widget.attrs['class'] = 'form-control'
+    form.fields['price'].widget.attrs['class'] = 'form-control'
+    form.fields['capacidad'].widget.attrs['class'] = 'form-control'
+    form.fields['category'].widget.attrs['class'] = 'form-control'
+
+    if request.method == 'POST':
+        form = ProductForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return redirect('product_list')  # Redirigir a la lista de productos
+
+    return render(request, 'store/create_ship.html', {'form': form})

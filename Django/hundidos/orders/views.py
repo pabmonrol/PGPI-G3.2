@@ -1,14 +1,16 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
 from carts.models import CartItem
-from .forms import OrderForm
+from .forms import OrderProductForm
 import datetime
 from .models import Order, Payment, OrderProduct
 import json
 from store.models import Product
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
-
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.core.paginator import Paginator
+from django.contrib import messages
 
 def payments(request):
     body = json.loads(request.body)
@@ -165,3 +167,40 @@ def order_complete(request):
 
     except(Payment.DoesNotExist, Order.DoesNotExist):
         return redirect('home')
+
+
+@login_required
+@user_passes_test(lambda u: u.is_admin)
+def order_list(request):
+    order_list = OrderProduct.objects.all()
+    paginator = Paginator(order_list, 10)  # 10 usuarios por página
+    page_number = request.GET.get('page')
+    orders = paginator.get_page(page_number)
+    return render(request, 'order_list.html', {'orders': orders})
+
+@login_required
+@user_passes_test(lambda u: u.is_admin)
+def edit_order(request, order_id):
+    # Obtener el OrderProduct por su ID
+    order_product = get_object_or_404(OrderProduct, id=order_id)
+
+    # Si el formulario fue enviado
+    if request.method == 'POST':
+        form = OrderProductForm(request.POST, instance=order_product)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'La reserva se ha actualizado correctamente.')
+            return redirect('order_list')  # Redirigir a la lista de reservas
+    else:
+        form = OrderProductForm(instance=order_product)
+    
+    return render(request, 'orders/edit_order.html', {'form': form, 'order_product': order_product})
+
+@login_required
+@user_passes_test(lambda u: u.is_admin)
+def delete_order(request, order_id):
+    order = get_object_or_404(OrderProduct, id=order_id)
+
+    order.delete()
+    messages.success(request, "Reserva eliminada con éxito.")
+    return redirect('order_list')  # O cualquier otra página a la que desees redirigir
