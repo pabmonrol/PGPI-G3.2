@@ -12,14 +12,19 @@ class Product(models.Model):
     description = models.TextField(max_length=500, blank=True)
     price = models.IntegerField()
     images = models.ImageField(upload_to='photos/products')
-    stock = models.IntegerField()
+    stock = models.IntegerField(default=1)
     is_available = models.BooleanField(default=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     created_date = models.DateTimeField(auto_now_add=True)
     modified_date = models.DateTimeField(auto_now=True)
-    fabricante = models.CharField(max_length=100, default='Rodman')
-    puerto = models.CharField(max_length=100, default='Santa Maria')
+    fabricante = models.CharField(max_length=100)
+    puerto = models.CharField(max_length=100)
     capacidad = models.IntegerField(default=4)
+
+    def save(self, *args, **kwargs):
+        # Generar slug a partir del product_name
+        self.slug = self.product_name.replace('_', '').replace('-', '').replace(' ', '-').lower()
+        super(Product, self).save(*args, **kwargs)
 
     def get_url(self):
         return reverse('product_detail', args=[self.category.slug, self.slug])

@@ -43,7 +43,19 @@
     </div>  <!-- category-wrap.// -->
   </div> <!-- col.// -->
   {% if user.is_authenticated and user.is_admin %}
-    <a href="{% url 'list_users' %}" class="btn btn-primary">Ver Usuarios</a>
+    
+  <div class="col-lg col-sm col-md col-6 flex-grow-0">
+    <div class="category-wrap dropdown d-inline-block float-right">
+      <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+        <i class="fa fa-bars"></i> Administrar
+      </button>
+      <div class="dropdown-menu">
+        <a class="dropdown-item" href="{% url 'list_users' %}">Administrar usuarios</a>
+        <a class="dropdown-item" href="{% url 'product_list' %}">Administrar barcos</a>
+        <a class="dropdown-item" href="{% url 'order_list' %}">Administrar reservas</a>
+      </div>
+    </div>  <!-- category-wrap.// -->
+  </div> <!-- col.// -->
 {% endif %}
   <a href="{% url 'store' %}" class="btn btn-outline-primary">Tienda</a>
   <div class="col-lg  col-md-6 col-sm-12 col">

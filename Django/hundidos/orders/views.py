@@ -1,14 +1,38 @@
-from django.shortcuts import render, redirect
+import random
+import string
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
 from carts.models import CartItem
-from .forms import OrderForm
+from .forms import OrderProductForm
 import datetime
 from .models import Order, Payment, OrderProduct
 import json
 from store.models import Product
 from django.core.mail import EmailMessage
+from django.shortcuts import render, redirect, get_object_or_404
 from django.template.loader import render_to_string
+from django.contrib.auth.decorators import login_required
+from django.conf import settings
+import os
+from store.models import Product, Variation
+from carts.models import CartItem, Cart
+from accounts.models import UserProfile
+from .forms import OrderForm
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.http import JsonResponse
 
+
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.core.paginator import Paginator
+from django.contrib import messages
+
+# Generar un codigo aleatorio de 7 letras y que empieza con RES
+def generate_random_code():
+    prefix = "RES-"
+    random_part = ''.join(random.choices(string.digits + string.ascii_letters, k=4))
+    return prefix + random_part
 
 def payments(request):
     body = json.loads(request.body)
@@ -72,9 +96,20 @@ def payments(request):
 
 
 # Create your views here.
-def place_order(request, total=0, quantity=0):
-    current_user = request.user
-    cart_items = CartItem.objects.filter(user=current_user)
+def _cart_id(request):
+    cart = request.session.session_key
+    if not cart:
+        cart = request.session.create()
+    return cart
+
+def place_order(request, total=0, duracion=0):
+    if request.user.is_authenticated:
+        current_user = request.user
+        cart_items = CartItem.objects.filter(user=current_user)
+    else:
+        cart = Cart.objects.get(cart_id=_cart_id(request))
+        cart_items = CartItem.objects.filter(cart=cart)
+
     cart_count = cart_items.count()
 
     if cart_count <= 0:
@@ -84,19 +119,24 @@ def place_order(request, total=0, quantity=0):
     tax = 0
 
     for cart_item in cart_items:
-        total += (cart_item.product.price * cart_item.quantity)
-        quantity += cart_item.quantity
+        duracion += cart_item.duracion()  # Invoca el método
+        total += (cart_item.product.price * cart_item.duracion())  # Usa el resultado del método
 
-    tax = round((16/100) * total, 2)
+
+
+    tax = round((21/100) * total, 2)
     grand_total = total + tax
-
 
     if request.method == 'POST':
         form = OrderForm(request.POST)
 
         if form.is_valid():
             data = Order()
-            data.user = current_user
+            if request.user.is_authenticated:
+                data.user = current_user
+            else:
+                data.user = None  # Usuario no registrado
+
             data.first_name = form.cleaned_data['first_name']
             data.last_name = form.cleaned_data['last_name']
             data.phone = form.cleaned_data['phone']
@@ -104,38 +144,56 @@ def place_order(request, total=0, quantity=0):
             data.address_line_1 = form.cleaned_data['address_line_1']
             data.address_line_2 = form.cleaned_data['address_line_2']
             data.country = form.cleaned_data['country']
-            data.city = form.cleaned_data['city']
             data.state = form.cleaned_data['state']
-            data.order_note = form.cleaned_data['order_note']
+            data.city = form.cleaned_data['city']
+            random_code = generate_random_code()
+            data.order_note = random_code
             data.order_total = grand_total
             data.tax = tax
             data.ip = request.META.get('REMOTE_ADDR')
             data.save()
 
-            yr=int(datetime.date.today().strftime('%Y'))
-            mt=int(datetime.date.today().strftime('%m'))
-            dt=int(datetime.date.today().strftime('%d'))
-            d = datetime.date(yr,mt,dt)
-            current_date = d.strftime("%Y%m%d")
+            # Generar número de pedido
+            yr = int(datetime.date.today().strftime('%Y'))
+            dt = int(datetime.date.today().strftime('%d'))
+            mt = int(datetime.date.today().strftime('%m'))
+            d = datetime.date(yr, mt, dt)
+            current_date = d.strftime("%Y%m%d")  # 20231121
             order_number = current_date + str(data.id)
             data.order_number = order_number
             data.save()
 
-            order = Order.objects.get(user=current_user, is_ordered=False, order_number=order_number)
+            order = Order.objects.get(is_ordered=False, order_number=order_number)
+            order_products = [
+                {
+                    'product': item.product,
+                    'quantity': duracion,
+                    'price': item.product.price,
+                    'total': item.product.price * item.quantity
+                }
+                for item in cart_items
+            ]
+
             context = {
                 'order': order,
                 'cart_items': cart_items,
+                'order_products': order_products,
                 'total': total,
                 'tax': tax,
                 'grand_total': grand_total,
             }
-
             return render(request, 'orders/payments.html', context)
+        else:
+            messages.error(request, 'Por favor, corrija los errores en el formulario.')
+            return redirect('checkout')
 
-    else:
-        return redirect('checkout')
-
-
+    context = {
+        'cart_items': cart_items,
+        'total': total,
+        'tax': tax,
+        'grand_total': grand_total,
+    }
+    return render(request, 'orders/place_order.html', context)
 
 def order_complete(request):
     order_number = request.GET.get('order_number')
@@ -164,3 +222,68 @@ def order_complete(request):
 
     except(Payment.DoesNotExist, Order.DoesNotExist):
         return redirect('home')
+    
+# Marca como PENDIENTE DE PAGO si la reserva no se ha pagado (opcion contra reembolso) 
+# y redirige a la pagina de lista de ordenes
+def mark_pending(request, order_id):
+    # Verifica que la orden existe
+    order = get_object_or_404(Order, id=order_id, is_ordered=False)
+    
+    # Cambiar el estado a 'Pendiente de pago'
+    order.status = 'Pendiente de pago'
+    order.is_ordered = True  # Opcional: Marca la orden como procesada
+    order.save()
+
+    # Enviar correo al usuario con los detalles de la orden
+    mail_subject = "Detalles de tu reserva - Codigo de Seguimiento"
+    body = render_to_string('orders/order_recieved_email.html', {
+        'order': order,
+        'nombre': order.first_name,
+    })
+
+    to_email = order.email
+    send_email = EmailMessage(mail_subject, body, to=[to_email])
+    send_email.send()
+
+    # Redirige a la vista de órdenes del usuario si está autenticado, de lo contrario redirige a la página de inicio
+    if request.user.is_authenticated:
+        return redirect('my_orders')
+    else:
+        return redirect('home')
+
+
+@login_required
+@user_passes_test(lambda u: u.is_admin)
+def order_list(request):
+    order_list = OrderProduct.objects.all()
+    paginator = Paginator(order_list, 10)  # 10 usuarios por página
+    page_number = request.GET.get('page')
+    orders = paginator.get_page(page_number)
+    return render(request, 'order_list.html', {'orders': orders})
+
+@login_required
+@user_passes_test(lambda u: u.is_admin)
+def edit_order(request, order_id):
+    # Obtener el OrderProduct por su ID
+    order_product = get_object_or_404(OrderProduct, id=order_id)
+
+    # Si el formulario fue enviado
+    if request.method == 'POST':
+        form = OrderProductForm(request.POST, instance=order_product)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'La reserva se ha actualizado correctamente.')
+            return redirect('order_list')  # Redirigir a la lista de reservas
+    else:
+        form = OrderProductForm(instance=order_product)
+    
+    return render(request, 'orders/edit_order.html', {'form': form, 'order_product': order_product})
+
+@login_required
+@user_passes_test(lambda u: u.is_admin)
+def delete_order(request, order_id):
+    order = get_object_or_404(OrderProduct, id=order_id)
+
+    order.delete()
+    messages.success(request, "Reserva eliminada con éxito.")
+    return redirect('order_list')  # O cualquier otra página a la que desees redirigir
