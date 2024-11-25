@@ -162,18 +162,18 @@ def checkout(request, total=0, duracion=0, cart_items=None):
             cart_items = CartItem.objects.filter(cart=cart, is_active=True)
 
         for cart_item in cart_items:
-            # Validar que las fechas no se solapen con otras reservas existentes
-            reservas_solapadas = CartItem.objects.filter(
-                product=cart_item.product,
-                fecha_inicio__lte=cart_item.fecha_fin,
-                fecha_fin__gte=cart_item.fecha_inicio,
-                is_active=True
-            ).exclude(id=cart_item.id)
+            # # Validar que las fechas no se solapen con otras reservas existentes
+            # reservas_solapadas = CartItem.objects.filter(
+            #     product=cart_item.product,
+            #     fecha_inicio__lte=cart_item.fecha_fin,
+            #     fecha_fin__gte=cart_item.fecha_inicio,
+            #     is_active=True
+            # ).exclude(id=cart_item.id)
 
-            if reservas_solapadas.exists():
-                solapado_item = reservas_solapadas.first()
-                messages.error(request, f'El producto {solapado_item.product.product_name} ya está reservado en las fechas seleccionadas.')
-                return redirect('cart')
+            # if reservas_solapadas.exists():
+            #     solapado_item = reservas_solapadas.first()
+            #     messages.error(request, f'El producto {solapado_item.product.product_name} ya está reservado en las fechas seleccionadas.')
+            #     return redirect('cart')
 
             duracion = (cart_item.fecha_fin - cart_item.fecha_inicio).days
             total += (cart_item.product.price * duracion)
@@ -214,18 +214,18 @@ def update_cart(request):
                 messages.error(request, 'La fecha de inicio debe ser anterior a la fecha de fin.')
                 return redirect('cart')
             
-            # Validar que las fechas no se solapen con otras reservas existentes
-            reservas_solapadas = CartItem.objects.filter(
-                product=cart_item.product,
-                is_active=True
-            ).exclude(id=cart_item.id)
+            # # Validar que las fechas no se solapen con otras reservas existentes
+            # reservas_solapadas = CartItem.objects.filter(
+            #     product=cart_item.product,
+            #     is_active=True
+            # ).exclude(id=cart_item.id)
 
-            for existing_item in reservas_solapadas:
-                # Verificar si hay solapamiento de fechas
-                if (datetime.strptime(start_date, '%Y-%m-%d').date() < existing_item.fecha_fin + timedelta(days=-1) and
-                    datetime.strptime(end_date, '%Y-%m-%d').date() > existing_item.fecha_inicio):
-                    messages.error(request, f'El producto {existing_item.product.product_name} ya está reservado en las fechas seleccionadas.')
-                    return redirect('cart')
+            # for existing_item in reservas_solapadas:
+            #     # Verificar si hay solapamiento de fechas
+            #     if (datetime.strptime(start_date, '%Y-%m-%d').date() < existing_item.fecha_fin + timedelta(days=-1) and
+            #         datetime.strptime(end_date, '%Y-%m-%d').date() > existing_item.fecha_inicio):
+            #         messages.error(request, f'El producto {existing_item.product.product_name} ya está reservado en las fechas seleccionadas.')
+            #         return redirect('cart')
             
             cart_item.fecha_inicio = datetime.strptime(start_date, '%Y-%m-%d')
             cart_item.fecha_fin = datetime.strptime(end_date, '%Y-%m-%d')
