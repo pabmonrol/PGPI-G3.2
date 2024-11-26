@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from orders.models import OrderProduct
 from store.models import Product, Variation
 from .models import Cart, CartItem
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
@@ -15,7 +16,6 @@ def _cart_id(request):
 
 def add_cart(request, product_id):
     product = Product.objects.get(id=product_id)
-
     current_user = request.user
 
     product_variation = []
@@ -31,51 +31,80 @@ def add_cart(request, product_id):
             except:
                 pass
 
-    try:
-        cart = Cart.objects.get(cart_id=_cart_id(request))
-    except Cart.DoesNotExist:
-        cart = Cart.objects.create(
-            cart_id = _cart_id(request)
-        )
-    cart.save()
+    if current_user.is_authenticated:
+        # Usuario autenticado
+        is_cart_item_exists = CartItem.objects.filter(product=product, user=current_user).exists()
+        if is_cart_item_exists:
+            cart_item = CartItem.objects.filter(product=product, user=current_user)
+            ex_var_list = []
+            id = []
+            for item in cart_item:
+                existing_variation = item.variation.all()
+                ex_var_list.append(list(existing_variation))
+                id.append(item.id)
 
-
-
-    is_cart_item_exists = CartItem.objects.filter(product=product, cart=cart).exists()
-    if is_cart_item_exists:
-        cart_item = CartItem.objects.filter(product=product, cart=cart)
-
-        ex_var_list = []
-        id = []
-        for item in cart_item:
-            existing_variation = item.variation.all()
-            ex_var_list.append(list(existing_variation))
-            id.append(item.id)
-
-        if product_variation in ex_var_list:
-            index = ex_var_list.index(product_variation)
-            item_id = id[index]
-            item = CartItem.objects.get(product=product, id=item_id)
-            item.quantity += 1
-            item.save()
+            if product_variation in ex_var_list:
+                # Incrementar la cantidad del artículo del carrito
+                index = ex_var_list.index(product_variation)
+                item_id = id[index]
+                item = CartItem.objects.get(product=product, id=item_id)
+                item.quantity += 1
+                item.save()
+            else:
+                # Crear un nuevo artículo del carrito
+                item = CartItem.objects.create(product=product, quantity=1, user=current_user)
+                if len(product_variation) > 0:
+                    item.variation.clear()
+                    item.variation.add(*product_variation)
+                item.save()
         else:
-            item = CartItem.objects.create(product=product, quantity=1, cart=cart)
+            # Crear un nuevo artículo del carrito
+            cart_item = CartItem.objects.create(product=product, quantity=1, user=current_user)
             if len(product_variation) > 0:
-                item.variation.clear()
-                item.variation.add(*product_variation)
-            item.save()
-
-    # Normal nota
+                cart_item.variation.clear()
+                cart_item.variation.add(*product_variation)
+            cart_item.save()
     else:
-        cart_item = CartItem.objects.create(
-            product = product,
-            quantity = 1,
-            cart = cart,
-        )
-        if len(product_variation) > 0:
-            cart_item.variation.clear()
-            cart_item.variation.add(*product_variation)
-        cart_item.save()
+        # Usuario no autenticado
+        try:
+            cart = Cart.objects.get(cart_id=_cart_id(request))
+        except Cart.DoesNotExist:
+            cart = Cart.objects.create(
+                cart_id=_cart_id(request)
+            )
+        cart.save()
+
+        is_cart_item_exists = CartItem.objects.filter(product=product, cart=cart).exists()
+        if is_cart_item_exists:
+            cart_item = CartItem.objects.filter(product=product, cart=cart)
+            ex_var_list = []
+            id = []
+            for item in cart_item:
+                existing_variation = item.variation.all()
+                ex_var_list.append(list(existing_variation))
+                id.append(item.id)
+
+            if product_variation in ex_var_list:
+                # Incrementar la cantidad del artículo del carrito
+                index = ex_var_list.index(product_variation)
+                item_id = id[index]
+                item = CartItem.objects.get(product=product, id=item_id)
+                item.quantity += 1
+                item.save()
+            else:
+                # Crear un nuevo artículo del carrito
+                item = CartItem.objects.create(product=product, quantity=1, cart=cart)
+                if len(product_variation) > 0:
+                    item.variation.clear()
+                    item.variation.add(*product_variation)
+                item.save()
+        else:
+            # Crear un nuevo artículo del carrito
+            cart_item = CartItem.objects.create(product=product, quantity=1, cart=cart)
+            if len(product_variation) > 0:
+                cart_item.variation.clear()
+                cart_item.variation.add(*product_variation)
+            cart_item.save()
 
     return redirect('cart')
 
@@ -162,18 +191,14 @@ def checkout(request, total=0, duracion=0, cart_items=None):
             cart_items = CartItem.objects.filter(cart=cart, is_active=True)
 
         for cart_item in cart_items:
-            # # Validar que las fechas no se solapen con otras reservas existentes
-            # reservas_solapadas = CartItem.objects.filter(
-            #     product=cart_item.product,
-            #     fecha_inicio__lte=cart_item.fecha_fin,
-            #     fecha_fin__gte=cart_item.fecha_inicio,
-            #     is_active=True
-            # ).exclude(id=cart_item.id)
-
-            # if reservas_solapadas.exists():
-            #     solapado_item = reservas_solapadas.first()
-            #     messages.error(request, f'El producto {solapado_item.product.product_name} ya está reservado en las fechas seleccionadas.')
-            #     return redirect('cart')
+            # Verificar solapamiento
+            conflicto = fechas_solapadas(cart_item.product, cart_item.fecha_inicio, cart_item.fecha_fin, excluido_id=cart_item.id)
+            if conflicto:
+                messages.error(
+                    request,
+                    f'El producto {conflicto.product.product_name} ya está reservado entre {conflicto.fecha_inicio} y {conflicto.fecha_fin}.'
+                )
+                return redirect('cart')
 
             duracion = (cart_item.fecha_fin - cart_item.fecha_inicio).days
             total += (cart_item.product.price * duracion)
@@ -214,20 +239,34 @@ def update_cart(request):
                 messages.error(request, 'La fecha de inicio debe ser anterior a la fecha de fin.')
                 return redirect('cart')
             
-            # # Validar que las fechas no se solapen con otras reservas existentes
-            # reservas_solapadas = CartItem.objects.filter(
-            #     product=cart_item.product,
-            #     is_active=True
-            # ).exclude(id=cart_item.id)
 
-            # for existing_item in reservas_solapadas:
-            #     # Verificar si hay solapamiento de fechas
-            #     if (datetime.strptime(start_date, '%Y-%m-%d').date() < existing_item.fecha_fin + timedelta(days=-1) and
-            #         datetime.strptime(end_date, '%Y-%m-%d').date() > existing_item.fecha_inicio):
-            #         messages.error(request, f'El producto {existing_item.product.product_name} ya está reservado en las fechas seleccionadas.')
-            #         return redirect('cart')
+            # Verificar solapamiento
+            conflicto = fechas_solapadas(cart_item.product, datetime.strptime(start_date, '%Y-%m-%d').date(), datetime.strptime(end_date, '%Y-%m-%d').date(), excluido_id=cart_item.id)
+            if conflicto:
+                messages.error(
+                    request,
+                    f'El producto {conflicto.product.product_name} ya está reservado entre {conflicto.fecha_inicio} y {conflicto.fecha_fin}.'
+                )
+                continue
             
             cart_item.fecha_inicio = datetime.strptime(start_date, '%Y-%m-%d')
             cart_item.fecha_fin = datetime.strptime(end_date, '%Y-%m-%d')
             cart_item.save()
     return redirect('cart')
+
+
+def fechas_solapadas(producto, nueva_fecha_inicio, nueva_fecha_fin, excluido_id=None):
+    """
+    Verifica si hay solapamiento de fechas con las reservas existentes para el producto.
+    """
+    reservas = OrderProduct.objects.filter(product=producto)
+    if excluido_id:
+        reservas = reservas.exclude(id=excluido_id)
+
+    for reserva in reservas:
+        if (
+            nueva_fecha_inicio <= reserva.fecha_fin and
+            nueva_fecha_fin >= reserva.fecha_inicio
+        ):
+            return reserva  # Conflicto detectado
+    return None

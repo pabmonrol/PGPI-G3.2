@@ -11,10 +11,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name='orderproduct',
-            name='quantity',
-        ),
         migrations.AddField(
             model_name='orderproduct',
             name='fecha_fin',
