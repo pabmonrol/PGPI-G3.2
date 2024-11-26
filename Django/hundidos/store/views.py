@@ -7,7 +7,7 @@ from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.db.models import Q
 from .forms import ReviewForm
 from django.contrib import messages
-from orders.models import OrderProduct
+from orders.models import OrderProduct, Order
 from datetime import timedelta
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required, user_passes_test
@@ -99,12 +99,35 @@ def search(request):
         if keyword:
             products = Product.objects.order_by('-created_date').filter(Q(description__icontains=keyword) | Q(product_name__icontains=keyword))
             product_count = products.count()
-    context = {
-        'products': products,
-        'product_count': product_count,
-    }
+            context = {
+                'products': products,
+                'product_count': product_count,
+                'reservations': reservations
+            }
+            return render(request, 'store/store.html', context)
+        
+    if 'reservation' in request.GET:    
+        reservation = request.GET.get('reservation')
+        order = Order.objects.get(order_note=reservation, is_ordered=True)
+        ordered_products = OrderProduct.objects.filter(order_id=order.id)
 
-    return render(request, 'store/store.html', context)
+        subtotal = 0
+        for i in ordered_products:
+            subtotal += i.product_price*i.quantity
+        payment = order.payment
+
+        context = {
+            'order': order,
+            'ordered_products': ordered_products,
+            'order_number': order.order_number,
+            'transID': 0,
+            'payment': payment,
+            'subtotal': subtotal,
+        }
+        if order.status == 'Pendiente de pago':
+            return render(request, 'orders/order_incomplete.html', context)
+        else:
+            return render(request, 'orders/order_complete.html', context)
 
 def submit_review(request, product_id):
     url = request.META.get('HTTP_REFERER')
