@@ -234,6 +234,32 @@ def mark_pending(request, order_id):
     order.is_ordered = True  # Opcional: Marca la orden como procesada
     order.save()
 
+    # Manejar carrito basado en usuario o sesión
+    if request.user.is_authenticated:
+        cart_items = CartItem.objects.filter(user=request.user)
+    else:
+        cart = Cart.objects.get(cart_id=_cart_id(request))
+        cart_items = CartItem.objects.filter(cart=cart)
+
+    for item in cart_items:
+        # Crear un nuevo OrderProduct
+        order_product = OrderProduct()
+        order_product.order = order
+        order_product.user = request.user if request.user.is_authenticated else None
+        order_product.product = item.product
+        order_product.quantity = item.quantity
+        order_product.product_price = item.product.price
+        order_product.fecha_inicio = item.fecha_inicio
+        order_product.fecha_fin = item.fecha_fin
+        order_product.ordered = False  # Mantén esto como False si aún no está confirmado
+        order_product.save()
+
+        #Copiar las variaciones
+        product_variation = item.variation.all()
+        order_product.variation.set(product_variation)
+        order_product.save()
+
+
     # Enviar correo al usuario con los detalles de la orden
     mail_subject = "Detalles de tu reserva - Codigo de Seguimiento"
     body = render_to_string('orders/order_recieved_email.html', {
@@ -245,12 +271,17 @@ def mark_pending(request, order_id):
     send_email = EmailMessage(mail_subject, body, to=[to_email])
     send_email.send()
 
+    # Limpiar el carrito
+    if request.user.is_authenticated:
+        CartItem.objects.filter(user=request.user).delete()
+    else:
+        CartItem.objects.filter(cart=cart).delete()
+
     # Redirige a la vista de órdenes del usuario si está autenticado, de lo contrario redirige a la página de inicio
     if request.user.is_authenticated:
         return redirect('my_orders')
     else:
         return redirect('home')
-
 
 @login_required
 @user_passes_test(lambda u: u.is_admin)
