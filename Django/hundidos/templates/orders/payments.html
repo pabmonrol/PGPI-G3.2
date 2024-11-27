@@ -32,7 +32,6 @@
             <!--<p class="card-text">Paypal</p>-->
             <!-- Detalle de la orden (order.order_note) es utilizado como código de seguimiento -->
             <p class="card-text mb-0">Código de Seguimiento: {{ order.order_note }}</p>
-            <p class="card-text mb-0">Fechas de Reserva: </p>
           </div>
     </div> <!-- card.// -->
 
@@ -71,8 +70,8 @@
                   <p class="text-muted small mb-0"><strong>Puerto:</strong> {{ cart_item.product.puerto }}</p>
                   <p class="text-muted small mb-0"><strong>Fabricante:</strong> {{ cart_item.product.fabricante }}</p>
                   <p class="text-muted small mb-0"><strong>Categoría:</strong> {{ cart_item.product.category_id }}</p>
-                  <p>{{ cart_item.fecha_inicio|date:'Y-m-d' }}</p>
-                  <p>{{ cart_item.fecha_fin|date:'Y-m-d' }}</p>
+                  <p class="highlighted-date">{{ cart_item.fecha_inicio|date:'Y-m-d' }}</p>
+                  <p class="highlighted-date">{{ cart_item.fecha_fin|date:'Y-m-d' }}</p>
                 </td>
                 <td>
                   <label for="">{{ cart_item.quantity }}</label>
@@ -128,7 +127,6 @@
     </div> <!-- container .//  -->
     </section>
       <script>
-
         function getCookie(name){
           let cookieValue = null;
           if (document.cookie && document.cookie !== ''){
@@ -196,4 +194,15 @@
        
     </script>
     <!-- ========================= SECTION CONTENT END// ========================= -->
+    <style>
+      .highlighted-date {
+          font-weight: bold;
+          color: #ffffff; /* Texto en blanco */
+          background-color: #007bff; /* Fondo azul */
+          padding: 5px 10px; /* Espaciado interno */
+          border-radius: 5px; /* Bordes redondeados */
+          display: inline-block; /* Asegura que el fondo se ajuste al contenido */
+          margin: 5px 0; /* Espaciado entre fechas */
+      }
+  </style>
 {% endblock %}
