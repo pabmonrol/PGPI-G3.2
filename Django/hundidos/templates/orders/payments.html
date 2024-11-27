@@ -71,6 +71,8 @@
                   <p class="text-muted small mb-0"><strong>Puerto:</strong> {{ cart_item.product.puerto }}</p>
                   <p class="text-muted small mb-0"><strong>Fabricante:</strong> {{ cart_item.product.fabricante }}</p>
                   <p class="text-muted small mb-0"><strong>Categoría:</strong> {{ cart_item.product.category_id }}</p>
+                  <p>{{ cart_item.fecha_inicio|date:'Y-m-d' }}</p>
+                  <p>{{ cart_item.fecha_fin|date:'Y-m-d' }}</p>
                 </td>
                 <td>
                   <label for="">{{ cart_item.quantity }}</label>
