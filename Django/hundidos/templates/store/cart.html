@@ -19,8 +19,9 @@
     <table class="table table-borderless table-shopping-cart">
     <thead class="text-muted">
     <tr class="small text-uppercase">
-      <th scope="col">Embarcación(es)</th>
-      <th scope="col" width="120">Elige Fechas</th>
+      <th scope="col" width="120">Embarcación(es)</th>
+      <th scope="col" width="120">Cantidad</th>
+      <th scope="col" width="120">Fechas</th>
       <th scope="col" width="120">Precio</th>
       <th scope="col" class="text-right" width="200"> </th>
     </tr>
@@ -52,6 +53,30 @@
                     </p>
                 </figcaption>
             </figure>
+        </td>
+        <td>
+            <!-- col.// -->
+            <div class="col">
+                <div class="input-group input-spinner">
+                    <div class="input-group-prepend">
+
+                    <a href="{% url 'remove_cart' cart_item.product.id cart_item.id %}" class="btn btn-light" type="button" id="button-plus"> <i class="fa fa-minus"></i> </a>
+                    </div>
+                    <input type="text" class="form-control"  value="{{ cart_item.quantity }}">
+                    <div class="input-group-append">
+
+                        <form action="{% url 'add_cart' cart_item.product.id %}" method="post">
+                        {% csrf_token %}
+                        {% for item in cart_item.variation.all %}
+                            <input type="hidden" name="{{ item.variation_category | lower }}" value="{{ item.variation_value | capfirst }}">
+                        {% endfor %}
+                        <button class="btn btn-light" type="submit" id="button-minus"> <i class="fa fa-plus"></i> </button>
+
+                        </form>
+
+                    </div>
+                </div> <!-- input-group.// -->
+            </div> <!-- col.// -->
         </td>
         <td>
             <div class="col">

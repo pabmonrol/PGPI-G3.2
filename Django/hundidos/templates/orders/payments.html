@@ -79,7 +79,7 @@
                 <td>
                     <div class="price-wrap">
                         <var class="price">${{ cart_item.sub_total }}</var>
-                        <small class="text-muted"> ${{ cart_item.product.price }} cada uno </small>
+                        <small class="text-muted"> ${{ cart_item.product.price }} cada día </small>
                     </div> <!-- price-wrap .// -->
                 </td>
 
@@ -118,7 +118,7 @@
                 </p>
 
                 <div id="paypal-button-container"></div>
-                <a href="{% url 'mark_pending' order.id %}" class="btn btn-light btn-block">Reservar y pagar luego</a>
+                <a href="{% url 'mark_pending' order.id %}" class="btn btn-light btn-block">Pago Contrareembolso</a>
         
             </div> <!-- card-body.// -->
             </div> <!-- card.// -->
