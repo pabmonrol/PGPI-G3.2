@@ -265,6 +265,7 @@ def mark_pending(request, order_id):
     body = render_to_string('orders/order_recieved_email.html', {
         'order': order,
         'nombre': order.first_name,
+        'cart_items': cart_items,
     })
 
     to_email = order.email
