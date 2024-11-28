@@ -74,7 +74,7 @@ def product_detail(request, category_slug, product_slug):
     except Exception as e:
         raise e
 
-    reservas = OrderProduct.objects.filter(product=single_product, ordered=True)
+    reservas = OrderProduct.objects.filter(product=single_product)
     eventos = []
     for reserva in reservas:
         eventos.append({
