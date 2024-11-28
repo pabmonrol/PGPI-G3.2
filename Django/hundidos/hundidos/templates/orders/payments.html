@@ -9,51 +9,49 @@
     <div class="row">
         <aside class="col-lg-8">
     <div class="card">
-          <h5 class="card-header">Mis datos personales</h5>
+          <h5 class="card-header">Dirección de Facturación</h5>
           <div class="card-body">
-            <p class="card-text mb-0">Nombres y Apellidos: {{ order.full_name }}</p>
-            <p class="card-text mb-0">Dirección: {{ order.full_address }}</p>
-            <p class="card-text mb-0">Pais: {{ order.country }}</p>
-            <p class="card-text mb-0">Ciudad: {{ order.city }}</p>
-            <p class="card-text mb-0">CP: {{ order.state }}</p>
-            <p class="card-text mb-0">Email de contacto: {{ order.email }}</p>
-            <p class="card-text mb-0">Móvil: {{ order.phone }}</p>
-            <!-- 
+            <p class="card-text mb-0">{{ order.full_name }}</p>
+            <p class="card-text mb-0">{{ order.full_address }}</p>
+            <p class="card-text mb-0">{{ order.country }}, {{ order.city }}, {{ order.state }}</p>
+            <p class="card-text mb-0">{{ order.email }}</p>
+            <p class="card-text mb-0">{{ order.phone }}</p>
             {% if order.order_note %}
                 <b>Detalles de la orden: </b> {{ order.order_note }}
-            {% endif %} -->
-
+            {% endif %}
           </div>
     </div> <!-- card.// -->
 
     <div class="card">
-          <h5 class="card-header">Detalles de la Reserva</h5>
+          <h5 class="card-header">Método de Pago</h5>
           <div class="card-body">
-            <!--<p class="card-text">Paypal</p>-->
-            <!-- Detalle de la orden (order.order_note) es utilizado como código de seguimiento -->
-            <p class="card-text mb-0">Código de Seguimiento: {{ order.order_note }}</p>
+            <p class="card-text">Paypal</p>
           </div>
     </div> <!-- card.// -->
 
     <div class="card">
+          <h5 class="card-header">Revisión de Productos</h5>
           <div class="card-body">
+
             <table class="table table-borderless table-shopping-cart">
             <thead class="text-muted">
             <tr class="small text-uppercase">
-              <th scope="col" style="width: 10%;">EMBARCACIÓN(ES)</th>
-              <th scope="col" style="width: 50%;">Detalles</th>
-              <th scope="col" style="width: 20%;">Cantidad</th>
-              <th scope="col" style="width: 20%;">Precio</th>
+              <th scope="col">Producto(s)</th>
+              <th scope="col" width="120">Cantidad</th>
+              <th scope="col" width="120">Precio</th>
+
             </tr>
             </thead>
             <tbody>
+
             {% for cart_item in cart_items %}
             <tr>
                 <td>
                     <figure class="itemside align-items-center">
                         <div class="aside"><img src="{{ cart_item.product.images.url }}" class="img-sm"></div>
                         <figcaption class="info">
-                            <a href="{{ cart_item.product.get_url }}" class="title text-dark"></a>
+                            <a href="{{ cart_item.product.get_url }}" class="title text-dark">{{ cart_item.product.product_name }}</a>
+
                             <p class="text-muted small">
                               {% if cart_item.variation.all %}
                                 {% for item in cart_item.variation.all %}
@@ -65,26 +63,20 @@
                     </figure>
                 </td>
                 <td>
-                  <strong>{{ cart_item.product.product_name }}</strong>
-                  <p class="text-muted small mb-0">{{ cart_item.product.description }}</p>
-                  <p class="text-muted small mb-0"><strong>Puerto:</strong> {{ cart_item.product.puerto }}</p>
-                  <p class="text-muted small mb-0"><strong>Fabricante:</strong> {{ cart_item.product.fabricante }}</p>
-                  <p class="text-muted small mb-0"><strong>Categoría:</strong> {{ cart_item.product.category_id }}</p>
-                  <p class="highlighted-date">{{ cart_item.fecha_inicio|date:'Y-m-d' }}</p>
-                  <p class="highlighted-date">{{ cart_item.fecha_fin|date:'Y-m-d' }}</p>
-                </td>
-                <td>
+
                   <label for="">{{ cart_item.quantity }}</label>
+
                 </td>
                 <td>
                     <div class="price-wrap">
-                        <var class="price">${{ cart_item.sub_total }}</var>
-                        <small class="text-muted"> ${{ cart_item.product.price }} cada uno </small>
+                        <var class="price">{{ cart_item.sub_total }}€</var>
+                        <small class="text-muted"> {{ cart_item.product.price }}€/cada uno </small>
                     </div> <!-- price-wrap .// -->
                 </td>
 
             </tr>
             {% endfor %}
+
             </tbody>
             </table>
 
@@ -98,22 +90,21 @@
             <div class="card-body">
                 <dl class="dlist-align">
                   <dt>Precio Total:</dt>
-                  <dd class="text-right">{{ total }}</dd>
+                  <dd class="text-right">{{ total }}€</dd>
                 </dl>
                 <dl class="dlist-align">
                   <dt>Impuesto IVA (16%):</dt>
-                  <dd class="text-right"> {{ tax }}</dd>
+                  <dd class="text-right"> {{ tax }}€</dd>
                 </dl>
                 <dl class="dlist-align">
                   <dt>Total:</dt>
-                  <dd class="text-right text-dark b"><strong>{{ grand_total }}</strong></dd>
+                  <dd class="text-right text-dark b"><strong>{{ grand_total }}€</strong></dd>
                 </dl>
                 <hr>
                 <p class="text-center mb-3">
                     <img src="{% static './images/misc/payments.png' %}" height="26">
                 </p>
-
-                <div id="paypal-button-container"></div>
+                  <div id="paypal-button-container"></div>
                 <a href="{% url 'mark_pending' order.id %}" class="btn btn-light btn-block">Reservar y pagar luego</a>
         
             </div> <!-- card-body.// -->
@@ -127,6 +118,7 @@
     </div> <!-- container .//  -->
     </section>
       <script>
+
         function getCookie(name){
           let cookieValue = null;
           if (document.cookie && document.cookie !== ''){
@@ -149,7 +141,7 @@
         var csrftoken = getCookie('csrftoken');
         var orderID = "{{ order.order_number }}"
         var payment_method = 'Paypal';
-        var redirect_url = "{% url 'order_complete' %}"
+        var redirect_url = "{% url 'my_orders' %}"
 
         paypal.Buttons({
 
@@ -194,15 +186,4 @@
        
     </script>
     <!-- ========================= SECTION CONTENT END// ========================= -->
-    <style>
-      .highlighted-date {
-          font-weight: bold;
-          color: #ffffff; /* Texto en blanco */
-          background-color: #007bff; /* Fondo azul */
-          padding: 5px 10px; /* Espaciado interno */
-          border-radius: 5px; /* Bordes redondeados */
-          display: inline-block; /* Asegura que el fondo se ajuste al contenido */
-          margin: 5px 0; /* Espaciado entre fechas */
-      }
-  </style>
 {% endblock %}

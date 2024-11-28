@@ -1,38 +1,14 @@
-import random
-import string
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from carts.models import CartItem
-from .forms import OrderProductForm
+from .forms import OrderForm, OrderProductForm
 import datetime
 from .models import Order, Payment, OrderProduct
 import json
 from store.models import Product
 from django.core.mail import EmailMessage
-from django.shortcuts import render, redirect, get_object_or_404
 from django.template.loader import render_to_string
-from django.contrib.auth.decorators import login_required
-from django.conf import settings
-import os
-from store.models import Product, Variation
-from carts.models import CartItem, Cart
-from accounts.models import UserProfile
-from .forms import OrderForm
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from django.http import JsonResponse
 
-
-from django.contrib.auth.decorators import login_required, user_passes_test
-from django.core.paginator import Paginator
-from django.contrib import messages
-
-# Generar un codigo aleatorio de 7 letras y que empieza con RES
-def generate_random_code():
-    prefix = "RES-"
-    random_part = ''.join(random.choices(string.digits + string.ascii_letters, k=20))
-    return prefix + random_part
 
 def payments(request):
     body = json.loads(request.body)
@@ -71,7 +47,7 @@ def payments(request):
         orderproduct.save()
 
         product = Product.objects.get(id=item.product_id)
-        #product.stock -= item.quantity
+        product.stock -= item.quantity
         product.save()
 
     CartItem.objects.filter(user=request.user).delete()
@@ -96,20 +72,9 @@ def payments(request):
 
 
 # Create your views here.
-def _cart_id(request):
-    cart = request.session.session_key
-    if not cart:
-        cart = request.session.create()
-    return cart
-
-def place_order(request, total=0, duracion=0):
-    if request.user.is_authenticated:
-        current_user = request.user
-        cart_items = CartItem.objects.filter(user=current_user)
-    else:
-        cart = Cart.objects.get(cart_id=_cart_id(request))
-        cart_items = CartItem.objects.filter(cart=cart)
-
+def place_order(request, total=0, quantity=0):
+    current_user = request.user
+    cart_items = CartItem.objects.filter(user=current_user)
     cart_count = cart_items.count()
 
     if cart_count <= 0:
@@ -119,24 +84,19 @@ def place_order(request, total=0, duracion=0):
     tax = 0
 
     for cart_item in cart_items:
-        duracion += cart_item.duracion()  # Invoca el método
-        total += (cart_item.product.price * cart_item.duracion())  # Usa el resultado del método
+        total += (cart_item.product.price * cart_item.quantity)
+        quantity += cart_item.quantity
 
-
-
-    tax = round((21/100) * total, 2)
+    tax = round((16/100) * total, 2)
     grand_total = total + tax
+
 
     if request.method == 'POST':
         form = OrderForm(request.POST)
 
         if form.is_valid():
             data = Order()
-            if request.user.is_authenticated:
-                data.user = current_user
-            else:
-                data.user = None  # Usuario no registrado
-
+            data.user = current_user
             data.first_name = form.cleaned_data['first_name']
             data.last_name = form.cleaned_data['last_name']
             data.phone = form.cleaned_data['phone']
@@ -144,56 +104,38 @@ def place_order(request, total=0, duracion=0):
             data.address_line_1 = form.cleaned_data['address_line_1']
             data.address_line_2 = form.cleaned_data['address_line_2']
             data.country = form.cleaned_data['country']
-            data.state = form.cleaned_data['state']
             data.city = form.cleaned_data['city']
-            random_code = generate_random_code()
-            data.order_note = random_code
+            data.state = form.cleaned_data['state']
+            data.order_note = form.cleaned_data['order_note']
             data.order_total = grand_total
             data.tax = tax
             data.ip = request.META.get('REMOTE_ADDR')
             data.save()
 
-            # Generar número de pedido
-            yr = int(datetime.date.today().strftime('%Y'))
-            dt = int(datetime.date.today().strftime('%d'))
-            mt = int(datetime.date.today().strftime('%m'))
-            d = datetime.date(yr, mt, dt)
-            current_date = d.strftime("%Y%m%d")  # 20231121
+            yr=int(datetime.date.today().strftime('%Y'))
+            mt=int(datetime.date.today().strftime('%m'))
+            dt=int(datetime.date.today().strftime('%d'))
+            d = datetime.date(yr,mt,dt)
+            current_date = d.strftime("%Y%m%d")
             order_number = current_date + str(data.id)
             data.order_number = order_number
             data.save()
 
-            order = Order.objects.get(is_ordered=False, order_number=order_number)
-            order_products = [
-                {
-                    'product': item.product,
-                    'quantity': duracion,
-                    'price': item.product.price,
-                    'total': item.product.price * item.quantity
-                }
-                for item in cart_items
-            ]
-
+            order = Order.objects.get(user=current_user, is_ordered=False, order_number=order_number)
             context = {
                 'order': order,
                 'cart_items': cart_items,
-                'order_products': order_products,
                 'total': total,
                 'tax': tax,
                 'grand_total': grand_total,
             }
-            return render(request, 'orders/payments.html', context)
-        else:
-            messages.error(request, 'Por favor, corrija los errores en el formulario.')
-            return redirect('checkout')
 
-    context = {
-        'cart_items': cart_items,
-        'total': total,
-        'tax': tax,
-        'grand_total': grand_total,
-    }
-    return render(request, 'orders/place_order.html', context)
+            return render(request, 'orders/payments.html', context)
+
+    else:
+        return redirect('checkout')
+
+
 
 def order_complete(request):
     order_number = request.GET.get('order_number')
@@ -222,7 +164,7 @@ def order_complete(request):
 
     except(Payment.DoesNotExist, Order.DoesNotExist):
         return redirect('home')
-    
+
 # Marca como PENDIENTE DE PAGO si la reserva no se ha pagado (opcion contra reembolso) 
 # y redirige a la pagina de lista de ordenes
 def mark_pending(request, order_id):

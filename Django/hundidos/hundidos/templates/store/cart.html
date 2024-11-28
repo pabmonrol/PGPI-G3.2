@@ -20,20 +20,12 @@
     <thead class="text-muted">
     <tr class="small text-uppercase">
       <th scope="col">Embarcación(es)</th>
-      <th scope="col" width="120">Elige Fechas</th>
+      <th scope="col" width="120">Cantidad</th>
       <th scope="col" width="120">Precio</th>
       <th scope="col" class="text-right" width="200"> </th>
     </tr>
     </thead>
     <tbody>
-
-    {% if messages %}
-        <div class="alert alert-danger">
-            {% for message in messages %}
-                <p>{{ message }}</p>
-            {% endfor %}
-        </div>
-    {% endif %}
 
     {% for cart_item in cart_items %}
     <tr>
@@ -54,33 +46,38 @@
             </figure>
         </td>
         <td>
-            <div class="col">
-                <div class="input-group input-spinner">
-                    <form action="{% url 'update_cart' %}" method="post" style="width: 100%;">
-                        {% csrf_token %}
-                        <input type="hidden" name="item_ids" value="{{ cart_item.id }}">
-                        {% for item in cart_item.variation.all %}
-                            <input type="hidden" name="{{ item.variation_category | lower }}" value="{{ item.variation_value | capfirst }}">
-                        {% endfor %}
-                        <div class="form-group">
-                            <label for="start_date_{{ cart_item.id }}">Fecha de Inicio:</label>
-                            <input type="date" name="start_date_{{ cart_item.id }}" id="start_date_{{ cart_item.id }}" value="{{ cart_item.fecha_inicio|date:'Y-m-d' }}" required onchange="updatePrice({{ cart_item.id }})">
-                        </div>
-                        <div class="form-group">
-                            <label for="end_date_{{ cart_item.id }}">Fecha de Fin:</label>
-                            <input type="date" name="end_date_{{ cart_item.id }}" id="end_date_{{ cart_item.id }}" value="{{ cart_item.fecha_fin|date:'Y-m-d' }}" required onchange="updatePrice({{ cart_item.id }})">
-                        </div>
-                        <div class="form-group">
-                            <button class="btn btn-primary btn-block" type="submit" id="button-update" style="width: 200px;">Actualizar Fechas</button>
-                        </div>
-                    </form>
-                </div>
-            </div> <!-- input-group.// -->
+            <!-- col.// -->
+                        <div class="col">
+                            <div class="input-group input-spinner">
+                                <div class="input-group-prepend">
+
+                                <a href="{% url 'remove_cart' cart_item.product.id cart_item.id %}" class="btn btn-light" type="button" id="button-plus"> <i class="fa fa-minus"></i> </a>
+                                </div>
+                                <input type="text" class="form-control"  value="{{ cart_item.quantity }}">
+                                <div class="input-group-append">
+
+                                  <form action="{% url 'add_cart' cart_item.product.id %}" method="post">
+                                    {% csrf_token %}
+                                    {% for item in cart_item.variation.all %}
+                                      <input type="hidden" name="{{ item.variation_category | lower }}" value="{{ item.variation_value | capfirst }}">
+                                    {% endfor %}
+                                    <button class="btn btn-light" type="submit" id="button-minus"> <i class="fa fa-plus"></i> </button>
+
+                                  </form>
+
+                                </div>
+                            </div> <!-- input-group.// -->
+                        </div> <!-- col.// -->
         </td>
         <td>
             <div class="price-wrap">
-                <var class="price" id="price_{{ cart_item.id }}" data-product-price="{{ cart_item.product.price }}">${{ cart_item.sub_total }}</var>
+<<<<<<< Updated upstream
+                <var class="price">${{ cart_item.sub_total }}</var>
+                <small class="text-muted"> {{ cart_item.product.price }}€/ud. </small>
+=======
+                <var class="price" id="price_{{ cart_item.id }}" data-product-price="{{ cart_item.product.price }}">{{ cart_item.sub_total }}€</var>
                 <small class="text-muted"> {{ cart_item.product.price }}€/dia </small>
+>>>>>>> Stashed changes
             </div> <!-- price-wrap .// -->
         </td>
         <td class="text-right">
@@ -132,25 +129,3 @@
     </section>
     <!-- ========================= SECTION CONTENT END// ========================= -->
 {% endblock %}
-
-<script>
-function updatePrice(cartItemId) {
-    const startDate = document.getElementById(`start_date_${cartItemId}`).value;
-    const endDate = document.getElementById(`end_date_${cartItemId}`).value;
-    const priceElement = document.getElementById(`price_${cartItemId}`);
-    const productPrice = parseFloat(priceElement.getAttribute('data-product-price'));
-
-    if (startDate && endDate) {
-        const start = new Date(startDate);
-        const end = new Date(endDate);
-        const duration = (end - start) / (1000 * 60 * 60 * 24); // Convertir milisegundos a días
-
-        if (duration > 0) {
-            const totalPrice = productPrice * duration;
-            priceElement.textContent = `€${totalPrice.toFixed(2)}`;
-        } else {
-            priceElement.textContent = '€0.00';
-        }
-    }
-}
-</script>
