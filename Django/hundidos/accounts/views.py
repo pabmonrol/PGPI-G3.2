@@ -16,7 +16,8 @@ from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
 from django.contrib.auth.password_validation import validate_password
 import requests
-
+from django.contrib.auth.models import User
+from django.http import HttpResponseForbidden
 
 # Create your views here.
 def register(request):
@@ -55,7 +56,8 @@ def register(request):
             send_email = EmailMessage(mail_subject, body, to=[to_email])
             send_email.send()
 
-            return redirect('/accounts/login/?command=verification&email=' + email)
+            return redirect(f'/accounts/login/?command=verification&email={email}')
+
 
     context = {
         'form': form
@@ -330,3 +332,109 @@ def list_users(request):
     page_number = request.GET.get('page')
     users = paginator.get_page(page_number)
     return render(request, 'list_users.html', {'users': users})
+
+@login_required
+@user_passes_test(lambda u: u.is_admin)
+def create_users(request):
+    form = RegistrationForm()
+    if request.method == 'POST':
+        form = RegistrationForm(request.POST)
+        if form.is_valid():
+            # Obtener datos del formulario
+            first_name = form.cleaned_data['first_name']
+            last_name = form.cleaned_data['last_name']
+            phone_number = form.cleaned_data['phone_number']
+            email = form.cleaned_data['email']
+            password = form.cleaned_data['password']
+            username = email.split("@")[0]  
+            
+            # Crear usuario solo si la contraseña es válida
+            if form.cleaned_data.get('is_admin'):
+                user = Account.objects.create_superuser(
+                    first_name=first_name, 
+                    last_name=last_name, 
+                    email=email, 
+                    username=username, 
+                    password=password
+                )
+            else:
+                user = Account.objects.create_user(
+                    first_name=first_name, 
+                    last_name=last_name, 
+                    email=email, 
+                    username=username, 
+                    password=password
+                )
+            user.phone_number = phone_number
+            user.save()
+
+            profile = UserProfile()
+            profile.user_id = user.id
+            profile.profile_picture = 'default/default-user.png'
+            profile.save()
+
+            # Enviar el correo de activación
+            current_site = get_current_site(request)
+            mail_subject = 'Activa tu cuenta en Hundidos para continuar'
+            body = render_to_string('accounts/account_verification_email.html', {
+                'user': user,
+                'domain': current_site,
+                'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+                'token': default_token_generator.make_token(user),
+            })
+            to_email = email
+            send_email = EmailMessage(mail_subject, body, to=[to_email])
+            send_email.send()
+
+            # Agregar mensaje de éxito
+            messages.success(request, f'Usuario {email} creado con éxito. Correo de confirmación enviado.')
+            return redirect('list_users')  # Usa el nombre de tu vista o URL correspondiente
+
+    context = {
+        'form': form
+    }
+    return render(request, 'accounts/create_users.html', context)
+
+
+
+@login_required
+@user_passes_test(lambda u: u.is_admin)
+def edit_user(request, user_id):
+    user = get_object_or_404(Account, id=user_id)  # Obtén el usuario por su ID
+    
+    if request.method == 'POST':
+        # Carga el formulario con los datos enviados y el usuario actual
+        form = RegistrationForm(request.POST, instance=user)
+        form.confirm_password = user.password
+        if form.is_valid():
+            # Guarda los datos actualizados, pero sin tocar la contraseña
+            updated_user = form.save(commit=False)
+            updated_user.password = user.password  # Mantén la contraseña actual
+            updated_user.save()
+            messages.success(request, "Usuario editado con éxito.")
+            return redirect('list_users')  # Redirige a alguna página (ajusta según tu necesidad)
+    else:
+        # Carga los datos del usuario en el formulario
+        form = RegistrationForm(instance=user)
+
+    return render(request, 'accounts/edit_user.html', {'form': form})
+
+
+
+def delete_user(request, user_id):
+    # Obtener el usuario que queremos eliminar
+    user = get_object_or_404(Account, id=user_id)
+
+    # Verificar si el usuario tiene alguna reserva asociada
+    if Order.objects.filter(user_id=user.id).exists():
+        # Si el usuario tiene al menos una reserva asociada, no permitimos la eliminación
+        messages.error(request, "No puedes eliminar esta cuenta porque tiene una reserva activa.")
+        # Redirigir a la lista de usuarios
+        return redirect('list_users')  # O cualquier otra página a la que desees redirigir
+
+    # Si no tiene reservas, se elimina la cuenta
+    user.delete()
+    first_name =user.first_name
+    messages.success(request, "'Usuario eliminado con éxito.")
+    # Redirigir a la lista de usuarios
+    return redirect('list_users')  # O cualquier otra página a la que desees redirigir
