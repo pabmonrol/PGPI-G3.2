@@ -71,8 +71,13 @@
         </td>
         <td>
             <div class="price-wrap">
+<<<<<<< Updated upstream
                 <var class="price">${{ cart_item.sub_total }}</var>
                 <small class="text-muted"> {{ cart_item.product.price }}€/ud. </small>
+=======
+                <var class="price" id="price_{{ cart_item.id }}" data-product-price="{{ cart_item.product.price }}">{{ cart_item.sub_total }}€</var>
+                <small class="text-muted"> {{ cart_item.product.price }}€/dia </small>
+>>>>>>> Stashed changes
             </div> <!-- price-wrap .// -->
         </td>
         <td class="text-right">

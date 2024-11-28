@@ -164,3 +164,162 @@ def order_complete(request):
 
     except(Payment.DoesNotExist, Order.DoesNotExist):
         return redirect('home')
+<<<<<<< Updated upstream
+=======
+    
+# Marca como PAGADO si el pago se ha realizado online 
+# y redirige a la pagina de lista de ordenes
+def mark_paid(request, order_id):
+    # Verifica que la orden existe
+    order = get_object_or_404(Order, id=order_id, is_ordered=False)
+    
+    # Cambiar el estado a 'Pendiente de pago'
+    order.status = 'Pendiente de pago'
+    order.is_ordered = True  # Opcional: Marca la orden como procesada
+    order.save()
+
+    # Manejar carrito basado en usuario o sesión
+    if request.user.is_authenticated:
+        cart_items = CartItem.objects.filter(user=request.user)
+    else:
+        cart = Cart.objects.get(cart_id=_cart_id(request))
+        cart_items = CartItem.objects.filter(cart=cart)
+
+    for item in cart_items:
+        # Crear un nuevo OrderProduct
+        order_product = OrderProduct()
+        order_product.order = order
+        order_product.user = request.user if request.user.is_authenticated else None
+        order_product.product = item.product
+        order_product.quantity = item.quantity
+        order_product.product_price = item.product.price
+        order_product.fecha_inicio = item.fecha_inicio
+        order_product.fecha_fin = item.fecha_fin
+        order_product.ordered = False  # Mantén esto como False si aún no está confirmado
+        order_product.save()
+
+        #Copiar las variaciones
+        product_variation = item.variation.all()
+        order_product.variation.set(product_variation)
+        order_product.save()
+
+
+    # Enviar correo al usuario con los detalles de la orden
+    mail_subject = "Detalles de tu reserva - Codigo de Seguimiento"
+    body = render_to_string('orders/order_recieved_email.html', {
+        'order': order,
+        'nombre': order.first_name,
+    })
+
+    to_email = order.email
+    send_email = EmailMessage(mail_subject, body, to=[to_email])
+    send_email.send()
+
+    # Limpiar el carrito
+    if request.user.is_authenticated:
+        CartItem.objects.filter(user=request.user).delete()
+    else:
+        CartItem.objects.filter(cart=cart).delete()
+
+    # Redirige a la vista de órdenes del usuario si está autenticado, de lo contrario redirige a la página de inicio
+    if request.user.is_authenticated:
+        return redirect('my_orders')
+    else:
+        return redirect('home')
+    
+# Marca como PENDIENTE DE PAGO si la reserva no se ha pagado (opcion contra reembolso) 
+# y redirige a la pagina de lista de ordenes
+def mark_pending(request, order_id):
+    # Verifica que la orden existe
+    order = get_object_or_404(Order, id=order_id, is_ordered=False)
+    
+    # Cambiar el estado a 'Pendiente de pago'
+    order.status = 'Pendiente de pago'
+    order.is_ordered = True  # Opcional: Marca la orden como procesada
+    order.save()
+
+    # Manejar carrito basado en usuario o sesión
+    if request.user.is_authenticated:
+        cart_items = CartItem.objects.filter(user=request.user)
+    else:
+        cart = Cart.objects.get(cart_id=_cart_id(request))
+        cart_items = CartItem.objects.filter(cart=cart)
+
+    for item in cart_items:
+        # Crear un nuevo OrderProduct
+        order_product = OrderProduct()
+        order_product.order = order
+        order_product.user = request.user if request.user.is_authenticated else None
+        order_product.product = item.product
+        order_product.quantity = item.quantity
+        order_product.product_price = item.product.price
+        order_product.fecha_inicio = item.fecha_inicio
+        order_product.fecha_fin = item.fecha_fin
+        order_product.ordered = False  # Mantén esto como False si aún no está confirmado
+        order_product.save()
+
+        #Copiar las variaciones
+        product_variation = item.variation.all()
+        order_product.variation.set(product_variation)
+        order_product.save()
+
+
+    # Enviar correo al usuario con los detalles de la orden
+    mail_subject = "Detalles de tu reserva - Codigo de Seguimiento"
+    body = render_to_string('orders/order_recieved_email.html', {
+        'order': order,
+        'nombre': order.first_name,
+    })
+
+    to_email = order.email
+    send_email = EmailMessage(mail_subject, body, to=[to_email])
+    send_email.send()
+
+    # Limpiar el carrito
+    if request.user.is_authenticated:
+        CartItem.objects.filter(user=request.user).delete()
+    else:
+        CartItem.objects.filter(cart=cart).delete()
+
+    # Redirige a la vista de órdenes del usuario si está autenticado, de lo contrario redirige a la página de inicio
+    if request.user.is_authenticated:
+        return redirect('my_orders')
+    else:
+        return redirect('home')
+
+@login_required
+@user_passes_test(lambda u: u.is_admin)
+def order_list(request):
+    order_list = OrderProduct.objects.all()
+    paginator = Paginator(order_list, 10)  # 10 usuarios por página
+    page_number = request.GET.get('page')
+    orders = paginator.get_page(page_number)
+    return render(request, 'order_list.html', {'orders': orders})
+
+@login_required
+@user_passes_test(lambda u: u.is_admin)
+def edit_order(request, order_id):
+    # Obtener el OrderProduct por su ID
+    order_product = get_object_or_404(OrderProduct, id=order_id)
+
+    # Si el formulario fue enviado
+    if request.method == 'POST':
+        form = OrderProductForm(request.POST, instance=order_product)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'La reserva se ha actualizado correctamente.')
+            return redirect('order_list')  # Redirigir a la lista de reservas
+    else:
+        form = OrderProductForm(instance=order_product)
+    
+    return render(request, 'orders/edit_order.html', {'form': form, 'order_product': order_product})
+
+@login_required
+@user_passes_test(lambda u: u.is_admin)
+def delete_order(request, order_id):
+    order = get_object_or_404(OrderProduct, id=order_id)
+
+    order.delete()
+    messages.success(request, "Reserva eliminada con éxito.")
+    return redirect('order_list')  # O cualquier otra página a la que desees redirigir
+>>>>>>> Stashed changes
