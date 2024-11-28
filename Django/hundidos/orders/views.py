@@ -117,13 +117,16 @@ def place_order(request, total=0, duracion=0):
 
     grand_total = 0
     tax = 0
+    extra_combustible = 0
 
     for cart_item in cart_items:
         duracion += cart_item.duracion()  # Invoca el método
         total += (cart_item.product.price * cart_item.duracion())  # Usa el resultado del método
+        if cart_item.product.category != 'Velero':
+            extra_combustible += 50
 
 
-
+    total += extra_combustible
     tax = round((21/100) * total, 2)
     grand_total = total + tax
 
@@ -180,6 +183,7 @@ def place_order(request, total=0, duracion=0):
                 'order_products': order_products,
                 'total': total,
                 'tax': tax,
+                'extra_combustible': extra_combustible,
                 'grand_total': grand_total,
             }
             return render(request, 'orders/payments.html', context)
