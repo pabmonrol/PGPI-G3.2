@@ -70,7 +70,7 @@ def get_default_end_date():
 class OrderProduct(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
     payment = models.ForeignKey(Payment, on_delete=models.CASCADE, blank=True, null=True)
-    user = models.ForeignKey(Account, on_delete=models.CASCADE)
+    user = models.ForeignKey(Account, on_delete=models.CASCADE, null=True, blank=True)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     variation = models.ManyToManyField(Variation, blank=True)
     quantity = models.IntegerField()
