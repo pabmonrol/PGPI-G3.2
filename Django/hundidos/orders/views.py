@@ -31,7 +31,7 @@ from django.contrib import messages
 # Generar un codigo aleatorio de 7 letras y que empieza con RES
 def generate_random_code():
     prefix = "RES-"
-    random_part = ''.join(random.choices(string.digits + string.ascii_letters, k=4))
+    random_part = ''.join(random.choices(string.digits + string.ascii_letters, k=20))
     return prefix + random_part
 
 def payments(request):
@@ -71,7 +71,7 @@ def payments(request):
         orderproduct.save()
 
         product = Product.objects.get(id=item.product_id)
-        product.stock -= item.quantity
+        #product.stock -= item.quantity
         product.save()
 
     CartItem.objects.filter(user=request.user).delete()
