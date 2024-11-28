@@ -126,9 +126,8 @@ def place_order(request, total=0, duracion=0):
             extra_combustible += 50
 
 
-    total += extra_combustible
-    tax = round((21/100) * total, 2)
-    grand_total = total + tax
+    tax = round((21/100) * (total + extra_combustible), 2)
+    grand_total = total + extra_combustible + tax
 
     if request.method == 'POST':
         form = OrderForm(request.POST)

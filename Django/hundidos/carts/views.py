@@ -160,9 +160,8 @@ def cart(request, total=0, duracion=0, cart_items=None):
             if not cart_item.product.category.slug == 'veleros': 
                 extra_combustible += 50  # Aplica una tasa extra de 50 a todos los barcos menos a los veleros
 
-        total += extra_combustible
-        tax = round((21/100) * total, 2)
-        grand_total = total + tax
+        tax = round((21/100) * (total + extra_combustible), 2)
+        grand_total = total + extra_combustible + tax
 
     except ObjectDoesNotExist:
         pass
