@@ -14,6 +14,21 @@ Detalles de tu reserva:
 - Email: {{ order.email }}
 - Teléfono: {{ order.phone }}
 
+Artículos reservados:
+{% for item in cart_items %}
+- Producto: {{ item.product.product_name }}
+  - Puerto: {{ item.product.puerto }}
+  - Capacidad: {{ item.product.capacidad }} personas
+  - Fabricante: {{ item.product.fabricante }}
+  - Categoría: {{ item.product.category.category_name }}
+  - Cantidad: {{ item.quantity }}
+  - Precio: €{{ item.product.price }}
+  - Fecha de Inicio: {{ item.fecha_inicio }} 
+  - Fecha de Fin: {{ item.fecha_fin }}
+{% endfor %}
+
+Importe total: €{{ order.order_total }}
+
 Por favor, realiza el pago lo antes posible para confirmar tu reserva.
 
 Para obtener ayuda adicional, visite nuestro Centro de soporte.

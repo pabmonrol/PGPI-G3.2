@@ -19,8 +19,9 @@
     <table class="table table-borderless table-shopping-cart">
     <thead class="text-muted">
     <tr class="small text-uppercase">
-      <th scope="col">Embarcación(es)</th>
+      <th scope="col" width="120">Embarcación(es)</th>
       <th scope="col" width="120">Cantidad</th>
+      <th scope="col" width="120">Fechas</th>
       <th scope="col" width="120">Precio</th>
       <th scope="col" class="text-right" width="200"> </th>
     </tr>
@@ -47,37 +48,56 @@
         </td>
         <td>
             <!-- col.// -->
-                        <div class="col">
-                            <div class="input-group input-spinner">
-                                <div class="input-group-prepend">
+            <div class="col">
+                <div class="input-group input-spinner">
+                    <div class="input-group-prepend">
 
-                                <a href="{% url 'remove_cart' cart_item.product.id cart_item.id %}" class="btn btn-light" type="button" id="button-plus"> <i class="fa fa-minus"></i> </a>
-                                </div>
-                                <input type="text" class="form-control"  value="{{ cart_item.quantity }}">
-                                <div class="input-group-append">
+                    <a href="{% url 'remove_cart' cart_item.product.id cart_item.id %}" class="btn btn-light" type="button" id="button-plus"> <i class="fa fa-minus"></i> </a>
+                    </div>
+                    <input type="text" class="form-control"  value="{{ cart_item.quantity }}">
+                    <div class="input-group-append">
 
-                                  <form action="{% url 'add_cart' cart_item.product.id %}" method="post">
-                                    {% csrf_token %}
-                                    {% for item in cart_item.variation.all %}
-                                      <input type="hidden" name="{{ item.variation_category | lower }}" value="{{ item.variation_value | capfirst }}">
-                                    {% endfor %}
-                                    <button class="btn btn-light" type="submit" id="button-minus"> <i class="fa fa-plus"></i> </button>
+                        <form action="{% url 'add_cart' cart_item.product.id %}" method="post">
+                        {% csrf_token %}
+                        {% for item in cart_item.variation.all %}
+                            <input type="hidden" name="{{ item.variation_category | lower }}" value="{{ item.variation_value | capfirst }}">
+                        {% endfor %}
+                        <button class="btn btn-light" type="submit" id="button-minus"> <i class="fa fa-plus"></i> </button>
 
-                                  </form>
+                        </form>
 
-                                </div>
-                            </div> <!-- input-group.// -->
-                        </div> <!-- col.// -->
+                    </div>
+                </div> <!-- input-group.// -->
+            </div> <!-- col.// -->
+        </td>
+        <td>
+            <div class="col">
+                <div class="input-group input-spinner">
+                    <form action="{% url 'update_cart' %}" method="post" style="width: 100%;">
+                        {% csrf_token %}
+                        <input type="hidden" name="item_ids" value="{{ cart_item.id }}">
+                        {% for item in cart_item.variation.all %}
+                            <input type="hidden" name="{{ item.variation_category | lower }}" value="{{ item.variation_value | capfirst }}">
+                        {% endfor %}
+                        <div class="form-group">
+                            <label for="start_date_{{ cart_item.id }}">Fecha de Inicio:</label>
+                            <input type="date" name="start_date_{{ cart_item.id }}" id="start_date_{{ cart_item.id }}" value="{{ cart_item.fecha_inicio|date:'Y-m-d' }}" required onchange="updatePrice({{ cart_item.id }})">
+                        </div>
+                        <div class="form-group">
+                            <label for="end_date_{{ cart_item.id }}">Fecha de Fin:</label>
+                            <input type="date" name="end_date_{{ cart_item.id }}" id="end_date_{{ cart_item.id }}" value="{{ cart_item.fecha_fin|date:'Y-m-d' }}" required onchange="updatePrice({{ cart_item.id }})">
+                        </div>
+                        <div class="form-group">
+                            <button class="btn btn-primary btn-block" type="submit" id="button-update" style="width: 200px;">Actualizar Fechas</button>
+                        </div>
+                    </form>
+                </div>
+            </div> <!-- input-group.// -->
         </td>
         <td>
             <div class="price-wrap">
-<<<<<<< Updated upstream
-                <var class="price">${{ cart_item.sub_total }}</var>
-                <small class="text-muted"> {{ cart_item.product.price }}€/ud. </small>
-=======
                 <var class="price" id="price_{{ cart_item.id }}" data-product-price="{{ cart_item.product.price }}">{{ cart_item.sub_total }}€</var>
                 <small class="text-muted"> {{ cart_item.product.price }}€/dia </small>
->>>>>>> Stashed changes
             </div> <!-- price-wrap .// -->
         </td>
         <td class="text-right">
@@ -100,13 +120,13 @@
                   <dd class="text-right">{{ total }}€</dd>
                 </dl>
                 <dl class="dlist-align">
-                  <dt>Impuesto IVA (21%):</dt>
-                  <dd class="text-right"> {{ tax }}€</dd>
-                </dl>
-                <dl class="dlist-align">
                   <dt>Tasa combustible:</dt>
                   <dd class="text-right"> {{ extra_combustible }}€</dd>
                 </dl>
+                <dl class="dlist-align">
+                    <dt>Impuesto IVA (21%):</dt>
+                    <dd class="text-right"> {{ tax }}€</dd>
+                  </dl>
                 <dl class="dlist-align">
                   <dt>Total:</dt>
                   <dd class="text-right text-dark b"><strong>{{ grand_total }}€</strong></dd>

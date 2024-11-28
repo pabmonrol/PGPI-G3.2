@@ -74,7 +74,7 @@ def product_detail(request, category_slug, product_slug):
     except Exception as e:
         raise e
 
-    reservas = OrderProduct.objects.filter(product=single_product, ordered=True)
+    reservas = OrderProduct.objects.filter(product=single_product)
     eventos = []
     for reserva in reservas:
         eventos.append({
@@ -96,38 +96,48 @@ def product_detail(request, category_slug, product_slug):
 def search(request):
     if 'keyword' in request.GET:
         keyword = request.GET['keyword']
+        products = Product.objects.all()
         if keyword:
             products = Product.objects.order_by('-created_date').filter(Q(description__icontains=keyword) | Q(product_name__icontains=keyword))
             product_count = products.count()
             context = {
                 'products': products,
                 'product_count': product_count,
-                'reservations': reservations
             }
             return render(request, 'store/store.html', context)
         
-    if 'reservation' in request.GET:    
+    # Búsqueda de pedidos por nota de reserva
+    if 'reservation' in request.GET:
         reservation = request.GET.get('reservation')
-        order = Order.objects.get(order_note=reservation, is_ordered=True)
-        ordered_products = OrderProduct.objects.filter(order_id=order.id)
+        try:
+            # Obtener el pedido que coincide con la nota y está ordenado
+            order = Order.objects.get(order_note=reservation, is_ordered=True)
+            ordered_products = OrderProduct.objects.filter(order_id=order.id)
 
-        subtotal = 0
-        for i in ordered_products:
-            subtotal += i.product_price*i.quantity
-        payment = order.payment
+            # Calcular el subtotal
+            subtotal = sum([i.product_price * i.quantity for i in ordered_products])
+            payment = order.payment
 
-        context = {
-            'order': order,
-            'ordered_products': ordered_products,
-            'order_number': order.order_number,
-            'transID': 0,
-            'payment': payment,
-            'subtotal': subtotal,
-        }
-        if order.status == 'Pendiente de pago':
-            return render(request, 'orders/order_incomplete.html', context)
-        else:
-            return render(request, 'orders/order_complete.html', context)
+            context = {
+                'order': order,
+                'ordered_products': ordered_products,
+                'order_number': order.order_number,
+                'transID': 0,  # Transacción por defecto
+                'payment': payment,
+                'subtotal': subtotal,
+            }
+
+            # Renderizar según el estado del pedido
+            if order.status == 'Pendiente de pago':
+                return render(request, 'orders/order_incomplete.html', context)
+            else:
+                return render(request, 'orders/order_complete.html', context)
+        except Order.DoesNotExist:
+            # Manejar el caso en que no se encuentra el pedido
+            return render(request, 'orders/order_not_found.html', {'error_message': 'No se encontró la reserva.'})
+
+    # Si no hay parámetros en la URL, redirigir a una página base o devolver un error
+    return render(request, 'store/store.html', {'products': [], 'product_count': 0})
 
 def submit_review(request, product_id):
     url = request.META.get('HTTP_REFERER')

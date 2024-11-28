@@ -82,13 +82,16 @@ def place_order(request, total=0, quantity=0):
 
     grand_total = 0
     tax = 0
+    extra_combustible = 0
 
     for cart_item in cart_items:
-        total += (cart_item.product.price * cart_item.quantity)
-        quantity += cart_item.quantity
+        total += (cart_item.product.price * cart_item.duracion() * cart_item.quantity) 
+        if cart_item.product.category != 'Velero':
+            extra_combustible += 50
 
-    tax = round((16/100) * total, 2)
-    grand_total = total + tax
+
+    tax = round((21/100) * (total + extra_combustible), 2)
+    grand_total = total + extra_combustible + tax
 
 
     if request.method == 'POST':
@@ -127,6 +130,7 @@ def place_order(request, total=0, quantity=0):
                 'cart_items': cart_items,
                 'total': total,
                 'tax': tax,
+                'extra_combustible': extra_combustible,
                 'grand_total': grand_total,
             }
 
@@ -207,6 +211,7 @@ def mark_pending(request, order_id):
     body = render_to_string('orders/order_recieved_email.html', {
         'order': order,
         'nombre': order.first_name,
+        'cart_items': cart_items,
     })
 
     to_email = order.email

@@ -93,7 +93,11 @@
                   <dd class="text-right">{{ total }}€</dd>
                 </dl>
                 <dl class="dlist-align">
-                  <dt>Impuesto IVA (16%):</dt>
+                  <dt>Tasa combustible:</dt>
+                  <dd class="text-right"> {{ extra_combustible }}€</dd>
+                </dl>
+                <dl class="dlist-align">
+                  <dt>Impuesto IVA (21%):</dt>
                   <dd class="text-right"> {{ tax }}€</dd>
                 </dl>
                 <dl class="dlist-align">
@@ -104,8 +108,9 @@
                 <p class="text-center mb-3">
                     <img src="{% static './images/misc/payments.png' %}" height="26">
                 </p>
-                  <div id="paypal-button-container"></div>
-                <a href="{% url 'mark_pending' order.id %}" class="btn btn-light btn-block">Reservar y pagar luego</a>
+
+                <div id="paypal-button-container"></div>
+                <a href="{% url 'mark_pending' order.id %}" class="btn btn-light btn-block">Pago Contrareembolso</a>
         
             </div> <!-- card-body.// -->
             </div> <!-- card.// -->
