@@ -16,6 +16,8 @@ from .forms import ProductForm
 
 def store(request, category_slug=None):
     categories = None
+    puertos = Product.objects.values_list('puerto', flat=True).distinct()
+    fabricantes = Product.objects.values_list('fabricante', flat=True).distinct()
     products = None
 
     if category_slug:
@@ -33,14 +35,14 @@ def store(request, category_slug=None):
         product_count = products.count()
 
     # Filtrar por puerto
-    puertos = request.GET.getlist('puerto')
-    if puertos:
-        products = products.filter(puerto__in=puertos)
+    selected_puerto = request.GET.get('puerto')
+    if selected_puerto:
+        products = products.filter(puerto=selected_puerto)
 
     #Filtrar por fabricante
-    fabricantes = request.GET.getlist('fabricante')
-    if fabricantes:
-        products = products.filter(fabricante__in=fabricantes)
+    selected_fabricante = request.GET.get('fabricante')
+    if selected_fabricante:
+        products = products.filter(fabricante=selected_fabricante)
 
     # Filtrar por rango de precios
     min_price = request.GET.get('min_price')
@@ -49,9 +51,9 @@ def store(request, category_slug=None):
         products = products.filter(price__gte=min_price, price__lte=max_price)
 
     # Filtrar por capacidad
-    capacidades = request.GET.getlist('capacidad')
-    if capacidades:
-        products = products.filter(capacidad__in=capacidades)
+    selected_capacity = request.GET.get('capacidad')
+    if selected_capacity:
+        products = products.filter(capacidad__gte=selected_capacity)
 
     paginator = Paginator(products, 6)
     page = request.GET.get('page')
@@ -61,6 +63,8 @@ def store(request, category_slug=None):
     context = {
         'products': paged_products,
         'product_count': product_count,
+        'puertos': puertos,
+        'fabricantes': fabricantes,
         'request': request,
     }
 

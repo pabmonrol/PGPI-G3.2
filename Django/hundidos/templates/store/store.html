@@ -49,31 +49,13 @@
             <form method="GET" action="{% url 'store' %}">
               <div class="filter-content collapse show" id="collapse_4" style="">
                 <div class="card-body">
-                  <label class="checkbox-btn">
-                    <input type="checkbox" name="puerto" value="Santa Maria" {% if 'Santa Maria' in request.GET.puerto %}checked{% endif %}>
-                    <span class="btn btn-light"> Santa Maria </span>
-                  </label>
-
-                  <label class="checkbox-btn">
-                    <input type="checkbox" name="puerto" value="Bahía de Cádiz" {% if 'Bahía de Cádiz' in request.GET.puerto %}checked{% endif %}>
-                    <span class="btn btn-light"> Bahía de Cádiz </span>
-                  </label>
-
-                  <label class="checkbox-btn">
-                    <input type="checkbox" name="puerto" value="Algeciras" {% if 'Algeciras' in request.GET.puerto %}checked{% endif %}>
-                    <span class="btn btn-light"> Algeciras </span>
-                  </label>
-
-                  <label class="checkbox-btn">
-                    <input type="checkbox" name="puerto" value="Tarifa" {% if 'Tarifa' in request.GET.puerto %}checked{% endif %}>
-                    <span class="btn btn-light"> Tarifa </span>
-                  </label>
-
-                  <label class="checkbox-btn">
-                    <input type="checkbox" name="puerto" value="Barbate" {% if 'Barbate' in request.GET.puerto %}checked{% endif %}>
-                    <span class="btn btn-light"> Barbate </span>
-                  </label>
-                </div><!-- card-body.// -->
+                  <ul class="list-menu">
+                    {% for puerto in puertos %}
+                    <li><a href="?puerto={{ puerto }}">{{ puerto }}</a></li>
+                    {% endfor %}
+                  </ul>
+                </div>
+        
               </div>
 
               <header class="card-header">
@@ -84,21 +66,14 @@
               </header>
               <div class="filter-content collapse show" id="collapse_5" style="">
                 <div class="card-body">
-                  <label class="checkbox-btn">
-                    <input type="checkbox" name="fabricante" value="Rodman" {% if 'Rodman' in request.GET.fabricante  %}checked{% endif %}>
-                    <span class="btn btn-light"> Rodman </span>
-                  </label>
-
-                  <label class="checkbox-btn">
-                    <input type="checkbox" name="fabricante" value="Beneteau" {% if 'Beneteau' in request.GET.fabricante %}checked{% endif %}>
-                    <span class="btn btn-light"> Beneteau </span>
-                  </label>
-
-                  <label class="checkbox-btn">
-                    <input type="checkbox" name="fabricante" value="Jeanneau" {% if 'Jeanneau' in request.GET.fabricante %}checked{% endif %}>
-                    <span class="btn btn-light"> Jeanneau </span>
-                  </label>
-                </div><!-- card-body.// -->
+                  <ul class="list-menu">
+                    {% for fabricante in fabricantes %}
+                    <li>
+                        <a href="?fabricante={{ fabricante }}">{{ fabricante }}</a>
+                    </li>
+                    {% endfor %}
+                  </ul>
+                </div>
               </div>
 
 
@@ -150,28 +125,24 @@
               </header>
               <div class="filter-content collapse show" id="collapse_6" style="">
                 <div class="card-body">
-                  <label class="checkbox-btn">
-                    <input type="checkbox" name="capacidad" value="2" {% if '2' in request.GET.capacidad  %}checked{% endif %}>
-                    <span class="btn btn-light"> 2 personas </span>
-                  </label>
-
-                  <label class="checkbox-btn">
-                    <input type="checkbox" name="capacidad" value="4" {% if '4' in request.GET.capacidad %}checked{% endif %}>
-                    <span class="btn btn-light"> 4 personas </span>
-                  </label>
-
-                  <label class="checkbox-btn">
-                    <input type="checkbox" name="capacidad" value="6" {% if '6' in request.GET.capacidad %}checked{% endif %}>
-                    <span class="btn btn-light"> 6 personas </span>
-                  </label>
-
-                  <label class="checkbox-btn">
-                    <input type="checkbox" name="capacidad" value="8" {% if '8' in request.GET.capacidad %}checked{% endif %}>
-                    <span class="btn btn-light"> 8 personas </span>
-                  </label>
-
-
-                </div><!-- card-body.// -->
+                  <ul class="list-menu">
+                    <li>
+                        <a href="?capacidad=2" class="text-dark">2 personas</a>
+                    </li>
+                    <li>
+                        <a href="?capacidad=4" class="text-dark">4 personas</a>
+                    </li>
+                    <li>
+                        <a href="?capacidad=6" class="text-dark">6 personas</a>
+                    </li>
+                    <li>
+                        <a href="?capacidad=8" class="text-dark">8 personas</a>
+                    </li>
+                    <li>
+                        <a href="?capacidad=10" class="text-dark">10 personas</a>
+                    </li>
+                  </ul>
+                </div>
               </div>
 
               <div class="card-body text-center">
