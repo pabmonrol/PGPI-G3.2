@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-5">
+    <div class="card">
+        {% if messages %}
+            <div class="alert alert-success">
+                {% for message in messages %}
+                    <p>{{ message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+        <div class="card-header">
+            <h3 class="mb-0">Lista de Reservas Activas</h3>
+        </div>
+        <div class="card-body">
+            <table class="table table-bordered table-hover">
+                <thead class="thead-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre Producto</th>
+                        <th>Email Usuario</th>
+                        <th>Fecha de Inicio</th>
+                        <th>Fecha de Fin</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                    <tr>
+                        <!-- ID del producto -->
+                        <td>{{ order.id }}</td>
+                        
+                        <!-- Nombre del producto -->
+                        <td>{{ order.product }}</td>
+                        
+                        <!-- Email del usuario -->
+                        <td>{{ order.user }}</td>
+                        
+                        <!-- Fecha de inicio de la reserva -->
+                        <td>{{ order.fecha_inicio|date:"d/m/Y" }}</td>
+                        
+                        <!-- Fecha de fin de la reserva -->
+                        <td>{{ order.fecha_fin|date:"d/m/Y" }}</td>
+                        
+                        <td>
+                            <!-- Botones de acciones (editar y eliminar) -->
+                            <a href="{% url 'edit_order' order.id  %}" class="btn btn-primary">Editar</a>
+                            <a href="{% url 'delete_order' order.id  %}" class="btn btn-danger">Eliminar</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center">No hay reservas activas para mostrar</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <nav class="mt-4" aria-label="Page navigation">
+        {% if orders.has_other_pages %}
+        <ul class="pagination justify-content-center">
+            {% if orders.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ orders.previous_page_number }}">Anterior</a>
+            </li>
+            {% else %}
+            <li class="page-item disabled">
+                <a class="page-link" href="#">Anterior</a>
+            </li>
+            {% endif %}
+
+            {% for i in orders.paginator.page_range %}
+            {% if orders.number == i %}
+            <li class="page-item active">
+                <a class="page-link" href="#">{{ i }}</a>
+            </li>
+            {% else %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ i }}">{{ i }}</a>
+            </li>
+            {% endif %}
+            {% endfor %}
+
+            {% if orders.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ orders.next_page_number }}">Siguiente</a>
+            </li>
+            {% else %}
+            <li class="page-item disabled">
+                <a class="page-link" href="#">Siguiente</a>
+            </li>
+            {% endif %}
+        </ul>
+        {% endif %}
+    </nav>
+</div>
+
+{% endblock %}

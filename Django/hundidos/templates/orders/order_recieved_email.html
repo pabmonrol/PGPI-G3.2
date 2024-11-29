@@ -1,0 +1,22 @@
+{% autoescape off %}
+Estimado/a {{ nombre }},
+
+Gracias por realizar su alquiler en Hundidos S.L.
+Hemos recibido tu orden con número {{ order.order_number }}.
+
+Detalles de tu reserva:
+- Código de seguimiento: {{ order.order_note }}
+- Nombre Completo: {{ order.full_name }}
+- Dirección: {{ order.full_address }}
+- País: {{ order.country }}
+- Ciudad: {{ order.city }}
+- Código Postal: {{ order.state }}
+- Email: {{ order.email }}
+- Teléfono: {{ order.phone }}
+
+Por favor, realiza el pago lo antes posible para confirmar tu reserva.
+
+Para obtener ayuda adicional, visite nuestro Centro de soporte.
+Este es un mensaje automático, por favor, no respondas.
+
+{% endautoescape %}
