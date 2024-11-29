@@ -151,6 +151,7 @@ def place_order(request, total=0, duracion=0):
             data.order_note = random_code
             data.order_total = grand_total
             data.tax = tax
+            data.extra_combustible = extra_combustible
             data.ip = request.META.get('REMOTE_ADDR')
             data.save()
 
