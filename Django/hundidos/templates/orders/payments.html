@@ -153,12 +153,10 @@
         var csrftoken = getCookie('csrftoken');
         var orderID = "{{ order.order_number }}"
         var payment_method = 'Paypal';
-        var redirect_url = "{% url 'order_complete' %}"
+        var redirect_url = "{% url 'home' %}";
         var userAuth = "{{ user.is_authenticated }}"
         if (userAuth) {
-          var redirect_url = "/accounts/my_orders/"
-        } else {
-          var redirect_url = "/" 
+          redirect_url = "/accounts/my_orders/"
         }
         
         

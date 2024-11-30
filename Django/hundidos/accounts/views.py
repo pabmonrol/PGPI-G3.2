@@ -258,12 +258,14 @@ def resetPassword(request):
 
 
 def my_orders(request):
-    orders = Order.objects.filter(user=request.user, is_ordered=True).order_by('-created_at')
-    context = {
-        'orders': orders,
-    }
-
-    return render(request, 'accounts/my_orders.html', context)
+    if request.user.is_authenticated:
+        orders = Order.objects.filter(user=request.user, is_ordered=True).order_by('-created_at')
+        context = {
+            'orders': orders,
+        }
+        return render(request, 'accounts/my_orders.html', context)
+    else:
+        return redirect('home')
 
 
 @login_required(login_url='login')
