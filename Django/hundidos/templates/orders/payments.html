@@ -154,13 +154,13 @@
         var orderID = "{{ order.order_number }}"
         var payment_method = 'Paypal';
         var redirect_url = "{% url 'order_complete' %}"
-        
+        var userAuth = "{{ user.is_authenticated }}"
         if (userAuth) {
           var redirect_url = "/accounts/my_orders/"
         } else {
           var redirect_url = "/" 
         }
-        //var userAuth = "{{ user.is_authenticated }}"
+        
         
 
         paypal.Buttons({
