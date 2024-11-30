@@ -1,3 +1,4 @@
+import datetime
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Product, ReviewRating, ProductGallery
 from category.models import Category
@@ -122,6 +123,27 @@ def search(request):
             subtotal = sum([i.product_price * i.quantity for i in ordered_products])
             payment = order.payment
 
+            # Crea una lista de productos con los días restantes calculados
+            products_with_days_left = []
+            for item in ordered_products:
+                fecha_fin = item.fecha_fin  # Asegúrate de que 'fecha_fin' sea un campo datetime
+                dias_restantes = (fecha_fin - datetime.date.today()).days  # Calcula los días restantes
+
+                # Si los días restantes son negativos, establece 0
+                if dias_restantes < 0:
+                    dias_restantes = 0
+                
+                # Crea un diccionario con el producto y los días restantes
+                product_data = {
+                    'item': item,  # El objeto 'OrderProduct'
+                    'nombre': item.product.product_name,  # El nombre del producto
+                    'dias_restantes': dias_restantes,  # Los días restantes calculados
+                }
+                
+                # Añade el diccionario a la lista
+                products_with_days_left.append(product_data)
+    
+
             context = {
                 'order': order,
                 'ordered_products': ordered_products,
@@ -129,6 +151,7 @@ def search(request):
                 'transID': 0,  # Transacción por defecto
                 'payment': payment,
                 'subtotal': subtotal,
+                'products_with_days_left': products_with_days_left,	
             }
 
             # Renderizar según el estado del pedido

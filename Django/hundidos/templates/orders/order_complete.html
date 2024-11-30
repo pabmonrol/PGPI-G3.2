@@ -44,6 +44,9 @@
                                 <li><strong>Orden:</strong> #{{ order_number }}</li>
                                 <li><strong>Fecha de orden:</strong> {{ order.created_at}} </li>
                                 <li><strong>Estatus:</strong> {{ order.status }} </li>
+                                {% for item in products_with_days_left %}
+                                    <li><strong>Día/s restantes de reserva:</strong> {{ item.dias_restantes }}, para el producto {{ item.nombre }}</li>
+                                {% endfor %}
                             </ul>
                         </div>
                     </div>

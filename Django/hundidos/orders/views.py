@@ -219,6 +219,7 @@ def order_complete(request):
             'transID': payment.payment_id,
             'payment': payment,
             'subtotal': subtotal,
+            'today': datetime.date.today(),
         }
 
         return render(request, 'orders/order_complete.html', context)
