@@ -49,6 +49,7 @@ def payments(request):
     payment.save()
     order.payment = payment
     order.is_ordered = True
+    order.status = 'Pagado'
     order.save()
 
     cart_items = CartItem.objects.filter(user=request.user)
