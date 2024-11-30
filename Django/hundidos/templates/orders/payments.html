@@ -78,8 +78,8 @@
                 </td>
                 <td>
                     <div class="price-wrap">
-                        <var class="price">${{ cart_item.sub_total }}</var>
-                        <small class="text-muted"> ${{ cart_item.product.price }} cada uno </small>
+                        <var class="price">{{ cart_item.sub_total }}€</var>
+                        <small class="text-muted"> {{ cart_item.product.price }}€/día </small>
                     </div> <!-- price-wrap .// -->
                 </td>
 
@@ -98,15 +98,15 @@
             <div class="card-body">
                 <dl class="dlist-align">
                   <dt>Precio Total:</dt>
-                  <dd class="text-right">{{ total }}</dd>
+                  <dd class="text-right">{{ total }}€</dd>
                 </dl>
                 <dl class="dlist-align">
                   <dt>Impuesto IVA (16%):</dt>
-                  <dd class="text-right"> {{ tax }}</dd>
+                  <dd class="text-right"> {{ tax }}€</dd>
                 </dl>
                 <dl class="dlist-align">
                   <dt>Total:</dt>
-                  <dd class="text-right text-dark b"><strong>{{ grand_total }}</strong></dd>
+                  <dd class="text-right text-dark b"><strong>{{ grand_total }}€</strong></dd>
                 </dl>
                 <hr>
                 <p class="text-center mb-3">
@@ -114,7 +114,7 @@
                 </p>
 
                 <div id="paypal-button-container"></div>
-                <a href="{% url 'mark_pending' order.id %}" class="btn btn-light btn-block">Reservar y pagar luego</a>
+                <a href="{% url 'mark_pending' order.id %}" class="btn btn-light btn-block">Pagar contrarrembolso</a>
         
             </div> <!-- card-body.// -->
             </div> <!-- card.// -->
@@ -149,7 +149,14 @@
         var csrftoken = getCookie('csrftoken');
         var orderID = "{{ order.order_number }}"
         var payment_method = 'Paypal';
-        var redirect_url = "{% url 'order_complete' %}"
+        var userAuth = "{{ user.is_authenticated }}"
+        if (userAuth) {
+          var redirect_url = "/accounts/my_orders/"
+        } else {
+          var redirect_url = "/"
+        }
+
+        
 
         paypal.Buttons({
 
@@ -170,6 +177,8 @@
                     sendData();
 
                     function sendData(){
+                      const modifiedStatus = "Pagado";
+                      const modifiedOrder = 1;
                       fetch(url, {
                         method : "POST",
                         headers: {
@@ -180,7 +189,8 @@
                           orderID: orderID,
                           transID: orderData.id,
                           payment_method: payment_method,
-                          status: orderData.status
+                          status: modifiedStatus,
+                          is_ordered: modifiedOrder
                         }),
                       })
                       .then((response) => response.json())
@@ -188,6 +198,7 @@
                         window.location.href = redirect_url + '?order_number='+data.order_number+'&payment_id='+data.transID;
                       });
                     }
+                    window.location.href = redirect_url;
                 });
             }
         }).render('#paypal-button-container');
