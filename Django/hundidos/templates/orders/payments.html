@@ -177,6 +177,8 @@
                     sendData();
 
                     function sendData(){
+                      const modifiedStatus = "Pagado";
+                      const modifiedOrder = 1;
                       fetch(url, {
                         method : "POST",
                         headers: {
@@ -187,7 +189,8 @@
                           orderID: orderID,
                           transID: orderData.id,
                           payment_method: payment_method,
-                          status: orderData.status
+                          status: modifiedStatus,
+                          is_ordered: modifiedOrder
                         }),
                       })
                       .then((response) => response.json())
