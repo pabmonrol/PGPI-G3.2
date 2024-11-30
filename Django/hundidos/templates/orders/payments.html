@@ -112,7 +112,6 @@
                 <p class="text-center mb-3">
                     <img src="{% static './images/misc/payments.png' %}" height="26">
                 </p>
-
                 <div id="paypal-button-container"></div>
                 <a href="{% url 'mark_pending' order.id %}" class="btn btn-light btn-block">Pagar contrarrembolso</a>
         
@@ -150,10 +149,11 @@
         var orderID = "{{ order.order_number }}"
         var payment_method = 'Paypal';
         var userAuth = "{{ user.is_authenticated }}"
-        if (userAuth) {
-          var redirect_url = "/accounts/my_orders/"
+        var redirect_url;
+        if (userAuth == "True") {
+          redirect_url = "/accounts/my_orders/";
         } else {
-          var redirect_url = "/"
+          redirect_url = "/";
         }
 
         
