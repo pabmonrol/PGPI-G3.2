@@ -111,6 +111,10 @@
                 <dl class="dlist-align">
                   <dt>Total:</dt>
                   <dd class="text-right text-dark b"><strong>{{ grand_total }}€</strong></dd>
+                </dl>                
+                <dl class="dlist-align">
+                  <dt class="text-right text-dark b"><strong>ATENCION:</strong></dt>
+                  <dd class="text-right text-dark b"><strong>En caso que desee cancelar la reserva no se devolverá el importe</strong></dd>
                 </dl>
                 <hr>
                 <p class="text-center mb-3">
@@ -190,7 +194,7 @@
                           orderID: orderID,
                           transID: orderData.id,
                           payment_method: payment_method,
-                          status: orderData.status
+                          status: 'Pagada'
                         }),
                       })
                       .then((response) => response.json())
