@@ -120,7 +120,9 @@ def search(request):
             ordered_products = OrderProduct.objects.filter(order_id=order.id)
 
             # Calcular el subtotal
-            subtotal = sum([i.product_price * i.quantity for i in ordered_products])
+            subtotal=0
+            for i in ordered_products:
+                subtotal += i.product_price*i.quantity*(i.fecha_fin-i.fecha_inicio).days
             payment = order.payment
 
             # Crea una lista de productos con los días restantes calculados

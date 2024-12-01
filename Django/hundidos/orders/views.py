@@ -224,7 +224,7 @@ def order_complete(request):
 
         subtotal = 0
         for i in ordered_products:
-            subtotal += i.product_price*i.quantity
+            subtotal += i.product_price*i.quantity*(i.fecha_fin-i.fecha_inicio).days
 
         payment = Payment.objects.get(payment_id=transID)
 
