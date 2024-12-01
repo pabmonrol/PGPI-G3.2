@@ -35,7 +35,7 @@ DEFAULT_FROM_EMAIL = 'hundidosgestion@gmail.com'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['pgpi-g3-2.onrender.com','127.0.0.1']
+ALLOWED_HOSTS = ['alquiler-de-barcos.onrender.com','localhost','pgpi-g3-2.onrender.com','127.0.0.1']
 
 
 
