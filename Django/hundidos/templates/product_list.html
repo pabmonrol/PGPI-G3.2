@@ -27,6 +27,7 @@
                         <th>Fabricante</th>
                         <th>Puerto</th>
                         <th>Capacidad</th>
+                        <th>Cantidad</th>
                         <th>Categoría</th>
                         <th>Acciones</th>
                     </tr>
@@ -37,10 +38,11 @@
                         <td><img src="{{ product.images.url }}" alt="Imagen del barco" width="100"></td>
                         <td>{{ product.product_name }}</td>
                         <td>{{ product.description }}</td>
-                        <td>${{ product.price }}</td>
+                        <td>{{ product.price }}€</td>
                         <td>{{ product.fabricante }}</td>
                         <td>{{ product.puerto }}</td>
                         <td>{{ product.capacidad }}</td>
+                        <td>{{ product.stock }}</td>
                         <td>{{ product.category }}</td>
                         <td>
                             <a href="{% url 'edit_ship' product.id %}" class="btn btn-primary">Editar</a>

@@ -225,6 +225,11 @@ def edit_ship(request, ship_id):
 def delete_ship(request, ship_id):
    # Obtener el usuario que queremos eliminar
     ship = get_object_or_404(Product, id=ship_id)
+    if OrderProduct.objects.filter(product_id=ship.id).exists():
+        # Si el usuario tiene al menos una reserva asociada, no permitimos la eliminación
+        messages.error(request, "No puedes eliminar esta cuenta porque tiene una reserva activa.")
+        # Redirigir a la lista de usuarios
+        return redirect('product_list')  # O cualquier otra página a la que desees redirigir
 
     # Si no tiene reservas, se elimina la cuenta
     ship.delete()
