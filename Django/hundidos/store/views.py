@@ -128,9 +128,11 @@ def search(request):
             # Crea una lista de productos con los días restantes calculados
             products_with_days_left = []
             for item in ordered_products:
-                fecha_fin = item.fecha_fin  # Asegúrate de que 'fecha_fin' sea un campo datetime
-                dias_restantes = (fecha_fin - datetime.date.today()).days  # Calcula los días restantes
-
+                fecha_fin = item.fecha_fin 
+                if (datetime.date.today() >= item.fecha_inicio):  # Si la fecha de fin es anterior a la fecha actual
+                    dias_restantes = (fecha_fin - datetime.date.today()).days  # Calcula los días restantes
+                else:
+                    dias_restantes = (fecha_fin - item.fecha_inicio).days  # Si no, establece los días restantes como la duración de la reserva
                 # Si los días restantes son negativos, establece 0
                 if dias_restantes < 0:
                     dias_restantes = 0
