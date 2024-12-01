@@ -90,7 +90,7 @@ def payments(request, order_id):
 
     # Enviar correo al usuario con los detalles de la orden
     mail_subject = "Detalles de tu reserva - Codigo de Seguimiento"
-    body = render_to_string('orders/order_recieved_email.html', {
+    body = render_to_string('orders/order_paid_email.html', {
         'order': order,
         'nombre': order.first_name,
         'cart_items': cart_items,
