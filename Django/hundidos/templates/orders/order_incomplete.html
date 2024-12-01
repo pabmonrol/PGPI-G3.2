@@ -3,8 +3,8 @@
 
 {% block content %}
 <div class="container" style="margin-top: 50px;">
-    <center><i class="fas fa-check-circle" style="font-size: 72px;margin-bottom: 20px;color: #28A745;"></i></center>
-    <h2 class="text-center">El pago se realizó con exito</h2>
+    <center><i class="fas fa-times-circle" style="font-size: 72px;margin-bottom: 20px;color: #a72828;"></i></center>
+    <h2 class="text-center">El pago está pendiente</h2>
 	<br>
 	<div class="text-center">
 		<a href="{% url 'store' %}" class="btn btn-success">Seguir comprando</a>
@@ -24,6 +24,7 @@
                             <!-- col-lg-6 start here -->      
                             <div class="invoice-logo"><img src="{% static './images/logo4.png' %}" alt="Invoice logo" style="max-height: 40px;"></div>
                         </div>
+                        <!-- col-lg-6 end here -->
                         <div class="col-lg-6">
                             <!-- col-lg-6 start here -->
                             <div class="invoice-from">
@@ -44,13 +45,8 @@
                                 <li><strong>Orden:</strong> #{{ order_number }}</li>
                                 <li><strong>Fecha de orden:</strong> {{ order.created_at}} </li>
                                 <li><strong>Estatus:</strong> {{ order.status }} </li>
-                                {% for item in products_with_days_left %}
-                                    <li><strong>Día/s restantes de reserva:</strong> {{ item.dias_restantes }}, para el producto {{ item.nombre }}</li>
-                                {% endfor %}
                             </ul>
                         </div>
-                    </div>
-                        <!-- col-lg-6 end here -->
                     </div>
                     <!-- End .row -->
                     <div class="invoice-items">

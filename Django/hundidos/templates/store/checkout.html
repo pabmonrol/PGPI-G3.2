@@ -29,7 +29,8 @@
                                 type="text" 
                                 name="first_name" 
                                 class="form-control" 
-                                value="{% if user.is_authenticated %}{{ user.first_name }}{% endif %}" 
+                                value="{% if user.is_authenticated %}{{ user.first_name }}{% endif %}"
+                                required
                                 {% if user.is_authenticated %}readonly{% endif %}
                                 >
                             </div>
@@ -40,6 +41,7 @@
                                 name="last_name" 
                                 class="form-control"
                                 value="{% if user.is_authenticated %}{{ user.last_name}}{% endif %}"
+                                required
                                 {% if user.is_authenticated %}readonly{% endif %}
                                 >
                             </div>
@@ -52,6 +54,7 @@
                                 name="email" 
                                 class="form-control"
                                 value="{% if user.is_authenticated %}{{ user.email}}{% endif %}"
+                                required
                                 {% if user.is_authenticated %}readonly{% endif %}
                                 >
                             </div>
@@ -62,6 +65,7 @@
                                 name="phone" 
                                 class="form-control"
                                 value="{% if user.is_authenticated %}{{ user.phone_number}}{% endif %}"
+                                required
                                 {% if user.is_authenticated %}readonly{% endif %}
                                 >
                             </div>
@@ -74,7 +78,7 @@
                                 name="address_line_1" 
                                 class="form-control" 
                                 value="{% if user_profile %} {{ user_profile.address_line_1}}{% endif %}"
-                                {% comment %}{% if user.is_authenticated %}readonly{% endif %} {% endcomment %}
+                                {% if not user.is_authenticated or not user_profile.address_line_1 %}required{% else %}readonly{% endif %}
                                 >
                             </div>
                             <div class="col form-group">
@@ -84,7 +88,7 @@
                                 name="address_line_2" 
                                 class="form-control"
                                 value="{% if user_profile %}{{ user_profile.address_line_2}}{% endif %}"
-                                {% comment %}{% if user.is_authenticated %}readonly{% endif %} {% endcomment %}
+                                {% if not user.is_authenticated or not user_profile.address_line_2 %}required{% else %}readonly{% endif %}
                                 >
                             </div>
                         </div>
@@ -96,7 +100,7 @@
                                 name="country" 
                                 class="form-control"
                                 value="{% if user_profile %}{{ user_profile.country}}{% endif %}"
-                                {% comment %}{% if user.is_authenticated %}readonly{% endif %} {% endcomment %}
+                                {% if not user.is_authenticated or not user_profile.country %}required{% else %}readonly{% endif %}
                                 >
                             </div>
                             <div class="col form-group">
@@ -106,7 +110,7 @@
                                 name="city" 
                                 class="form-control"
                                 value="{% if user_profile %}{{ user_profile.city}}{% endif %}"
-                                {% comment %}{% if user.is_authenticated %}readonly{% endif %} {% endcomment %}
+                                {% if not user.is_authenticated or not user_profile.city %}required{% else %}readonly{% endif %}
                                 >
                             </div>
                             <div class="col form-group">
@@ -116,7 +120,7 @@
                                 name="state" 
                                 class="form-control"
                                 value="{% if user_profile %}{{ user_profile.state}}{% endif %}"
-                                {% comment %}{% if user.is_authenticated %}readonly{% endif %} {% endcomment %}
+                                {% if not user.is_authenticated or not user_profile.state %}required{% else %}readonly{% endif %}
                                 >
                             </div>
                         </div>

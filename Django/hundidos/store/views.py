@@ -1,3 +1,4 @@
+import datetime
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Product, ReviewRating, ProductGallery
 from category.models import Category
@@ -7,7 +8,7 @@ from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.db.models import Q
 from .forms import ReviewForm
 from django.contrib import messages
-from orders.models import OrderProduct
+from orders.models import OrderProduct, Order
 from datetime import timedelta
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required, user_passes_test
@@ -16,6 +17,8 @@ from .forms import ProductForm
 
 def store(request, category_slug=None):
     categories = None
+    puertos = Product.objects.values_list('puerto', flat=True).distinct()
+    fabricantes = Product.objects.values_list('fabricante', flat=True).distinct()
     products = None
 
     if category_slug:
@@ -33,14 +36,14 @@ def store(request, category_slug=None):
         product_count = products.count()
 
     # Filtrar por puerto
-    puertos = request.GET.getlist('puerto')
-    if puertos:
-        products = products.filter(puerto__in=puertos)
+    selected_puerto = request.GET.get('puerto')
+    if selected_puerto:
+        products = products.filter(puerto=selected_puerto)
 
     #Filtrar por fabricante
-    fabricantes = request.GET.getlist('fabricante')
-    if fabricantes:
-        products = products.filter(fabricante__in=fabricantes)
+    selected_fabricante = request.GET.get('fabricante')
+    if selected_fabricante:
+        products = products.filter(fabricante=selected_fabricante)
 
     # Filtrar por rango de precios
     min_price = request.GET.get('min_price')
@@ -49,9 +52,9 @@ def store(request, category_slug=None):
         products = products.filter(price__gte=min_price, price__lte=max_price)
 
     # Filtrar por capacidad
-    capacidades = request.GET.getlist('capacidad')
-    if capacidades:
-        products = products.filter(capacidad__in=capacidades)
+    selected_capacity = request.GET.get('capacidad')
+    if selected_capacity:
+        products = products.filter(capacidad__gte=selected_capacity)
 
     paginator = Paginator(products, 6)
     page = request.GET.get('page')
@@ -61,6 +64,8 @@ def store(request, category_slug=None):
     context = {
         'products': paged_products,
         'product_count': product_count,
+        'puertos': puertos,
+        'fabricantes': fabricantes,
         'request': request,
     }
 
@@ -74,7 +79,7 @@ def product_detail(request, category_slug, product_slug):
     except Exception as e:
         raise e
 
-    reservas = OrderProduct.objects.filter(product=single_product, ordered=True)
+    reservas = OrderProduct.objects.filter(product=single_product)
     eventos = []
     for reserva in reservas:
         eventos.append({
@@ -96,15 +101,72 @@ def product_detail(request, category_slug, product_slug):
 def search(request):
     if 'keyword' in request.GET:
         keyword = request.GET['keyword']
+        products = Product.objects.all()
         if keyword:
             products = Product.objects.order_by('-created_date').filter(Q(description__icontains=keyword) | Q(product_name__icontains=keyword))
             product_count = products.count()
-    context = {
-        'products': products,
-        'product_count': product_count,
-    }
+            context = {
+                'products': products,
+                'product_count': product_count,
+            }
+            return render(request, 'store/store.html', context)
+        
+    # Búsqueda de pedidos por nota de reserva
+    if 'reservation' in request.GET:
+        reservation = request.GET.get('reservation')
+        try:
+            # Obtener el pedido que coincide con la nota y está ordenado
+            order = Order.objects.get(order_note=reservation, is_ordered=True)
+            ordered_products = OrderProduct.objects.filter(order_id=order.id)
 
-    return render(request, 'store/store.html', context)
+            # Calcular el subtotal
+            subtotal=0
+            for i in ordered_products:
+                subtotal += i.product_price*i.quantity*(i.fecha_fin-i.fecha_inicio).days
+            payment = order.payment
+
+            # Crea una lista de productos con los días restantes calculados
+            products_with_days_left = []
+            for item in ordered_products:
+                fecha_fin = item.fecha_fin  # Asegúrate de que 'fecha_fin' sea un campo datetime
+                dias_restantes = (fecha_fin - datetime.date.today()).days  # Calcula los días restantes
+
+                # Si los días restantes son negativos, establece 0
+                if dias_restantes < 0:
+                    dias_restantes = 0
+                
+                # Crea un diccionario con el producto y los días restantes
+                product_data = {
+                    'item': item,  # El objeto 'OrderProduct'
+                    'nombre': item.product.product_name,  # El nombre del producto
+                    'dias_restantes': dias_restantes,  # Los días restantes calculados
+                }
+                
+                # Añade el diccionario a la lista
+                products_with_days_left.append(product_data)
+    
+
+            context = {
+                'order': order,
+                'ordered_products': ordered_products,
+                'order_number': order.order_number,
+                'transID': 0,  # Transacción por defecto
+                'payment': payment,
+                'subtotal': subtotal,
+                'products_with_days_left': products_with_days_left,	
+            }
+
+            # Renderizar según el estado del pedido
+            if order.status == 'Pendiente de pago':
+                return render(request, 'orders/order_incomplete.html', context)
+            else:
+                return render(request, 'orders/order_complete.html', context)
+        except Order.DoesNotExist:
+            # Manejar el caso en que no se encuentra el pedido
+            return render(request, 'orders/order_not_found.html', {'error_message': 'No se encontró la reserva.'})
+
+    # Si no hay parámetros en la URL, redirigir a una página base o devolver un error
+    return render(request, 'store/store.html', {'products': [], 'product_count': 0})
 
 def submit_review(request, product_id):
     url = request.META.get('HTTP_REFERER')

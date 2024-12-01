@@ -19,11 +19,13 @@ class Payment(models.Model):
     def __str__(self):
         return self.payment_id
 
-# Estados de una reserva: PAGADO o PENDIENTE DE PAGO
+# Estados de una reserva
 class Order(models.Model):
     STATUS = (
         ('Pagado', 'Pagado'),
         ('Pendiente de pago', 'Pendiente de pago'),
+        ('En uso', 'En uso'),
+        ('Devuelto', 'Devuelto'),
     )
 
 
@@ -42,6 +44,7 @@ class Order(models.Model):
     order_note = models.CharField(max_length=100, blank=True)
     order_total = models.FloatField()
     tax = models.FloatField()
+    extra_combustible = models.FloatField()
     status = models.CharField(max_length=50, choices=STATUS, default='New')
     ip = models.CharField(blank=True, max_length=20)
     is_ordered = models.BooleanField(default=False)
@@ -68,7 +71,7 @@ def get_default_end_date():
 class OrderProduct(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
     payment = models.ForeignKey(Payment, on_delete=models.CASCADE, blank=True, null=True)
-    user = models.ForeignKey(Account, on_delete=models.CASCADE)
+    user = models.ForeignKey(Account, on_delete=models.CASCADE, null=True, blank=True)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     variation = models.ManyToManyField(Variation, blank=True)
     quantity = models.IntegerField()

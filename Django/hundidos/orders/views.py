@@ -31,60 +31,80 @@ from django.contrib import messages
 # Generar un codigo aleatorio de 7 letras y que empieza con RES
 def generate_random_code():
     prefix = "RES-"
-    random_part = ''.join(random.choices(string.digits + string.ascii_letters, k=4))
+    random_part = ''.join(random.choices(string.digits + string.ascii_letters, k=20))
     return prefix + random_part
 
-def payments(request):
+def _cart_id(request):
+    cart = request.session.session_key
+    if not cart:
+        cart = request.session.create()
+    return cart
+
+def payments(request, order_id):
+    # Verifica que la orden existe
+    order = Order.objects.get(is_ordered=False, order_number=order_id)
     body = json.loads(request.body)
-    order = Order.objects.get(user=request.user, is_ordered=False, order_number=body['orderID'])
+    if request.user.is_authenticated:
+        payment = Payment(
+            user = request.user if request.user.is_authenticated else None,
+            payment_id = body['transID'],
+            payment_method = body['payment_method'],
+            amount_id = order.order_total,
+            status = body['status'],
+        )
 
-    payment = Payment(
-        user = request.user,
-        payment_id = body['transID'],
-        payment_method = body['payment_method'],
-        amount_id = order.order_total,
-        status = body['status'],
-    )
+        payment.save()
+        order.payment = payment
+        order.is_ordered = True
+        order.status = 'Pagado'
+        order.save()
+    else:
+        order.is_ordered = True
+        order.status = 'Pagado'
+        order.save()
 
-    payment.save()
-    order.payment = payment
-    order.is_ordered = True
-    order.save()
-
-    cart_items = CartItem.objects.filter(user=request.user)
+    # Manejar carrito basado en usuario o sesión
+    if request.user.is_authenticated:
+        cart_items = CartItem.objects.filter(user=request.user)
+    else:
+        cart = Cart.objects.get(cart_id=_cart_id(request))
+        cart_items = CartItem.objects.filter(cart=cart)
 
     for item in cart_items:
-        orderproduct = OrderProduct()
-        orderproduct.order_id = order.id
-        orderproduct.payment = payment
-        orderproduct.user_id = request.user.id
-        orderproduct.product_id = item.product_id
-        orderproduct.quantity = item.quantity
-        orderproduct.product_price = item.product.price
-        orderproduct.ordered = True
-        orderproduct.save()
+        # Crear un nuevo OrderProduct
+        order_product = OrderProduct()
+        order_product.order = order
+        order_product.user = request.user if request.user.is_authenticated else None
+        order_product.product = item.product
+        order_product.quantity = item.quantity
+        order_product.product_price = item.product.price
+        order_product.fecha_inicio = item.fecha_inicio
+        order_product.fecha_fin = item.fecha_fin
+        order_product.ordered = False  # Mantén esto como False si aún no está confirmado
+        order_product.save()
 
-        cart_item = CartItem.objects.get(id=item.id)
-        product_variation = cart_item.variation.all()
-        orderproduct = OrderProduct.objects.get(id=orderproduct.id)
-        orderproduct.variation.set(product_variation)
-        orderproduct.save()
+        #Copiar las variaciones
+        product_variation = item.variation.all()
+        order_product.variation.set(product_variation)
+        order_product.save()
 
-        product = Product.objects.get(id=item.product_id)
-        product.stock -= item.quantity
-        product.save()
-
-    CartItem.objects.filter(user=request.user).delete()
-
-    mail_subject = 'Tu compra fue realizada!'
-    body = render_to_string('orders/order_recieved_email.html', {
-        'user': request.user,
+    # Enviar correo al usuario con los detalles de la orden
+    mail_subject = "Detalles de tu reserva - Codigo de Seguimiento"
+    body = render_to_string('orders/order_paid_email.html', {
         'order': order,
+        'nombre': order.first_name,
+        'cart_items': cart_items,
     })
 
-    to_email = request.user.email
+    to_email = order.email
     send_email = EmailMessage(mail_subject, body, to=[to_email])
     send_email.send()
+
+    # Limpiar el carrito
+    if request.user.is_authenticated:
+        CartItem.objects.filter(user=request.user).delete()
+    else:
+        CartItem.objects.filter(cart=cart).delete()
 
     data = {
         'order_number': order.order_number,
@@ -96,11 +116,7 @@ def payments(request):
 
 
 # Create your views here.
-def _cart_id(request):
-    cart = request.session.session_key
-    if not cart:
-        cart = request.session.create()
-    return cart
+
 
 def place_order(request, total=0, duracion=0):
     if request.user.is_authenticated:
@@ -117,15 +133,16 @@ def place_order(request, total=0, duracion=0):
 
     grand_total = 0
     tax = 0
+    extra_combustible = 0
 
     for cart_item in cart_items:
-        duracion += cart_item.duracion()  # Invoca el método
-        total += (cart_item.product.price * cart_item.duracion())  # Usa el resultado del método
+        total += (cart_item.product.price * cart_item.duracion() * cart_item.quantity) 
+        if cart_item.product.category != 'Velero':
+            extra_combustible += 50
 
 
-
-    tax = round((21/100) * total, 2)
-    grand_total = total + tax
+    tax = round((21/100) * (total + extra_combustible), 2)
+    grand_total = total + extra_combustible + tax
 
     if request.method == 'POST':
         form = OrderForm(request.POST)
@@ -150,6 +167,7 @@ def place_order(request, total=0, duracion=0):
             data.order_note = random_code
             data.order_total = grand_total
             data.tax = tax
+            data.extra_combustible = extra_combustible
             data.ip = request.META.get('REMOTE_ADDR')
             data.save()
 
@@ -180,6 +198,7 @@ def place_order(request, total=0, duracion=0):
                 'order_products': order_products,
                 'total': total,
                 'tax': tax,
+                'extra_combustible': extra_combustible,
                 'grand_total': grand_total,
             }
             return render(request, 'orders/payments.html', context)
@@ -205,7 +224,7 @@ def order_complete(request):
 
         subtotal = 0
         for i in ordered_products:
-            subtotal += i.product_price*i.quantity
+            subtotal += i.product_price*i.quantity*(i.fecha_fin-i.fecha_inicio).days
 
         payment = Payment.objects.get(payment_id=transID)
 
@@ -216,6 +235,7 @@ def order_complete(request):
             'transID': payment.payment_id,
             'payment': payment,
             'subtotal': subtotal,
+            'today': datetime.date.today(),
         }
 
         return render(request, 'orders/order_complete.html', context)
@@ -234,23 +254,55 @@ def mark_pending(request, order_id):
     order.is_ordered = True  # Opcional: Marca la orden como procesada
     order.save()
 
+    # Manejar carrito basado en usuario o sesión
+    if request.user.is_authenticated:
+        cart_items = CartItem.objects.filter(user=request.user)
+    else:
+        cart = Cart.objects.get(cart_id=_cart_id(request))
+        cart_items = CartItem.objects.filter(cart=cart)
+
+    for item in cart_items:
+        # Crear un nuevo OrderProduct
+        order_product = OrderProduct()
+        order_product.order = order
+        order_product.user = request.user if request.user.is_authenticated else None
+        order_product.product = item.product
+        order_product.quantity = item.quantity
+        order_product.product_price = item.product.price
+        order_product.fecha_inicio = item.fecha_inicio
+        order_product.fecha_fin = item.fecha_fin
+        order_product.ordered = False  # Mantén esto como False si aún no está confirmado
+        order_product.save()
+
+        #Copiar las variaciones
+        product_variation = item.variation.all()
+        order_product.variation.set(product_variation)
+        order_product.save()
+
+
     # Enviar correo al usuario con los detalles de la orden
     mail_subject = "Detalles de tu reserva - Codigo de Seguimiento"
     body = render_to_string('orders/order_recieved_email.html', {
         'order': order,
         'nombre': order.first_name,
+        'cart_items': cart_items,
     })
 
     to_email = order.email
     send_email = EmailMessage(mail_subject, body, to=[to_email])
     send_email.send()
 
+    # Limpiar el carrito
+    if request.user.is_authenticated:
+        CartItem.objects.filter(user=request.user).delete()
+    else:
+        CartItem.objects.filter(cart=cart).delete()
+
     # Redirige a la vista de órdenes del usuario si está autenticado, de lo contrario redirige a la página de inicio
     if request.user.is_authenticated:
         return redirect('my_orders')
     else:
         return redirect('home')
-
 
 @login_required
 @user_passes_test(lambda u: u.is_admin)

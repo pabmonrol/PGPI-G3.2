@@ -48,8 +48,11 @@ def add_cart(request, product_id):
                 index = ex_var_list.index(product_variation)
                 item_id = id[index]
                 item = CartItem.objects.get(product=product, id=item_id)
-                item.quantity += 1
-                item.save()
+                if item.quantity < product.stock:
+                    item.quantity += 1
+                    item.save()
+                else:
+                    messages.error(request, f'No hay más barcos disponibles de {item.product.product_name}.')
             else:
                 # Crear un nuevo artículo del carrito
                 item = CartItem.objects.create(product=product, quantity=1, user=current_user)
@@ -89,8 +92,11 @@ def add_cart(request, product_id):
                 index = ex_var_list.index(product_variation)
                 item_id = id[index]
                 item = CartItem.objects.get(product=product, id=item_id)
-                item.quantity += 1
-                item.save()
+                if item.quantity < product.stock:
+                    item.quantity += 1
+                    item.save()
+                else:
+                    messages.error(request, f'No hay más barcos disponibles de {item.product.product_name}.')
             else:
                 # Crear un nuevo artículo del carrito
                 item = CartItem.objects.create(product=product, quantity=1, cart=cart)
@@ -155,13 +161,12 @@ def cart(request, total=0, duracion=0, cart_items=None):
             cart_items = CartItem.objects.filter(cart=cart, is_active=True)
 
         for cart_item in cart_items:
-            duracion += (cart_item.fecha_fin - cart_item.fecha_inicio).days
-            total += (cart_item.product.price * duracion)
+            total += (cart_item.product.price * cart_item.duracion() * cart_item.quantity) 
             if not cart_item.product.category.slug == 'veleros': 
                 extra_combustible += 50  # Aplica una tasa extra de 50 a todos los barcos menos a los veleros
 
-        tax = round((21/100) * total, 2)
-        grand_total = total + tax + extra_combustible
+        tax = round((21/100) * (total + extra_combustible), 2)
+        grand_total = total + extra_combustible + tax
 
     except ObjectDoesNotExist:
         pass
