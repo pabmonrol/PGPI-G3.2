@@ -137,7 +137,7 @@ def place_order(request, total=0, duracion=0):
 
     for cart_item in cart_items:
         total += (cart_item.product.price * cart_item.duracion() * cart_item.quantity) 
-        if cart_item.product.category != 'veleros':
+        if not cart_item.product.category.slug == 'veleros': 
             extra_combustible += 50
 
 
