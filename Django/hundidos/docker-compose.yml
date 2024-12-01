@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: Dockerfile
     volumes:
-      - ./data:/hundidos/db
+      - ./hundidos
     ports:
       - "8000:8000"
     environment:
