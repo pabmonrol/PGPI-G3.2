@@ -19,30 +19,29 @@
                 <thead class="thead-light">
                     <tr>
                         <th>ID</th>
-                        <th>Nombre Producto</th>
-                        <th>Email Usuario</th>
-                        <th>Fecha de Inicio</th>
-                        <th>Fecha de Fin</th>
+                        <th>Nombre</th>
+                        <th>Teléfono</th>
+                        <th>Email</th>
+                        <th>Dirección</th>
+                        <th>País</th>
+                        <th>Ciudad</th>
+                        <th>Codigo Postal</th>
+                        <th>Estado</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for order in orders %}
                     <tr>
-                        <!-- ID del producto -->
                         <td>{{ order.id }}</td>
-                        
-                        <!-- Nombre del producto -->
-                        <td>{{ order.product }}</td>
-                        
-                        <!-- Email del usuario -->
-                        <td>{{ order.user }}</td>
-                        
-                        <!-- Fecha de inicio de la reserva -->
-                        <td>{{ order.fecha_inicio|date:"d/m/Y" }}</td>
-                        
-                        <!-- Fecha de fin de la reserva -->
-                        <td>{{ order.fecha_fin|date:"d/m/Y" }}</td>
+                        <td>{{ order.first_name }} {{ order.last_name }}</td>
+                        <td>{{ order.phone }}</td>
+                        <td>{{ order.email }}</td>
+                        <td>{{ order.address_line_1 }} {{ order.address_line_2 }}</td>
+                        <td>{{ order.country }}</td>
+                        <td>{{ order.city }}</td>
+                        <td>{{ order.state }}</td>
+                        <td>{{ order.status }}</td>
                         
                         <td>
                             <!-- Botones de acciones (editar y eliminar) -->
