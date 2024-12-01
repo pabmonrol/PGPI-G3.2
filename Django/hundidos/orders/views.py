@@ -108,7 +108,7 @@ def payments(request, order_id):
 
     data = {
         'order_number': order.order_number,
-        'transID': payment.payment_id,
+        'order_note': order.order_note,
     }
 
 
@@ -137,7 +137,7 @@ def place_order(request, total=0, duracion=0):
 
     for cart_item in cart_items:
         total += (cart_item.product.price * cart_item.duracion() * cart_item.quantity) 
-        if cart_item.product.category != 'Velero':
+        if cart_item.product.category != 'veleros':
             extra_combustible += 50
 
 

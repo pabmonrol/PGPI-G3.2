@@ -13,3 +13,5 @@ sqlparse==0.4.4
 tzdata==2023.3
 urllib3==1.26.16
 django-ckeditor==6.2.0
+playwright
+selenium

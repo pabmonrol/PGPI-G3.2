@@ -132,86 +132,64 @@
 
     </div> <!-- row.// -->
     <!-- ============================ COMPONENT 1 END .// ================================= -->
-    </div> <!-- container .//  -->
-    </section>
       <script>
-        function getCookie(name){
-          let cookieValue = null;
-          if (document.cookie && document.cookie !== ''){
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++){
-              const cookie = cookies[i].trim();
-              if(cookie.substring(0,name.length + 1) === (name + '=')){
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-              }
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
             }
-          }
-
-          return cookieValue;
+            return cookieValue;
         }
+    
+        const csrftoken = getCookie('csrftoken');
+        const url = "{% url 'payments' order.order_number %}";
+        var redirect_url = "{% url 'order_complete' %}"
+    
 
-
-        var amount = "{{ grand_total }}"
-
-        var csrftoken = getCookie('csrftoken');
-        var orderID = "{{ order.order_number }}"
-        var url = "{% url 'payments' order.order_number %}"
-        var payment_method = 'Paypal';
-        var redirect_url = "{% url 'home' %}";
-        var userAuth = "{{ user.is_authenticated }}"
-        if (userAuth) {
-          redirect_url = "/accounts/my_orders/"
-        }
         
-        
-
         paypal.Buttons({
-
-            createOrder: function(data, actions){
-              return actions.order.create({
-                  purchase_units: [{
-                      amount: {
-                        value: amount
-                      }
-                  }]
-              });
+            createOrder: function (data, actions) {
+                return actions.order.create({
+                    purchase_units: [{
+                        amount: { value: "{{ grand_total }}" }
+                    }]
+                });
             },
-
-            // Finalize the transaction on the server after payer approval
-            onApprove: function(data, actions) {
-                return actions.order.capture().then(function(orderData) {
-                    console.log(orderData);
-                    sendData();
-
-                    function sendData(){
-                      const modifiedStatus = "Pagado";
-                      const modifiedOrder = 1;
-                      fetch(url, {
-                        method : "POST",
+            onApprove: function (data, actions) {
+                return actions.order.capture().then(function (orderData) {
+                    fetch(url, {
+                        method: "POST",
                         headers: {
-                          "Content-Type": "application/json",
-                          "X-CSRFToken" : csrftoken,
+                            "Content-Type": "application/json",
+                            "X-CSRFToken": csrftoken
                         },
                         body: JSON.stringify({
-                          orderID: orderID,
-                          transID: orderData.id,
-                          payment_method: payment_method,
-                          status: modifiedStatus,
-                          is_ordered: modifiedOrder
+                            orderID: "{{ order.order_number }}",
+                            transID: orderData.id,
+                            payment_method: 'Paypal',
+                            status: 'Pagado',
+                            is_ordered: 1
                         }),
-                      })
-                      .then((response) => response.json())
-                      .then((data) => {
-                        window.location.href = redirect_url + '?order_number='+data.order_number+'&payment_id='+data.transID;
-                      });
-                    }
-                    window.location.href = redirect_url;
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        window.location.href = '/store/search/?keyword=&reservation=' + data.order_note;// + '&payment_id=' + data.transID;
+                    });
                 });
-            }
+            },
         }).render('#paypal-button-container');
-       
     </script>
+       
+    </div> <!-- container .//  -->
+    </section>
+     
     <!-- ========================= SECTION CONTENT END// ========================= -->
     <style>
       .highlighted-date {
@@ -225,3 +203,82 @@
       }
   </style>
 {% endblock %}
+
+<!-- <script>
+  function getCookie(name){
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== ''){
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++){
+        const cookie = cookies[i].trim();
+        if(cookie.substring(0,name.length + 1) === (name + '=')){
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+
+    return cookieValue;
+  }
+
+
+  var amount = "{{ grand_total }}"
+
+  var csrftoken = getCookie('csrftoken');
+  var orderID = "{{ order.order_number }}"
+  var url = "{% url 'payments' order.order_number %}"
+  var payment_method = 'Paypal';
+  var redirect_url = "{% url 'home' %}";
+  var userAuth = "{{ user.is_authenticated }}"
+  if (userAuth) {
+    redirect_url = "/accounts/my_orders/"
+  }
+  
+  
+
+  paypal.Buttons({
+
+      createOrder: function(data, actions){
+        return actions.order.create({
+            purchase_units: [{
+                amount: {
+                  value: amount
+                }
+            }]
+        });
+      },
+
+      // Finalize the transaction on the server after payer approval
+      onApprove: function(data, actions) {
+          return actions.order.capture().then(function(orderData) {
+              console.log(orderData);
+              sendData();
+
+              function sendData(){
+                const modifiedStatus = "Pagado";
+                const modifiedOrder = 1;
+                fetch(url, {
+                  method : "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken" : csrftoken,
+                  },
+                  body: JSON.stringify({
+                    orderID: orderID,
+                    transID: orderData.id,
+                    payment_method: payment_method,
+                    status: modifiedStatus,
+                    is_ordered: modifiedOrder
+                  }),
+                })
+                .then((response) => response.json())
+                .then((data) => {
+                  window.location.href = redirect_url + '?order_number='+data.order_number+'&payment_id='+data.transID;
+                });
+              }
+              window.location.href = redirect_url;
+          });
+      }
+  }).render('#paypal-button-container');
+ 
+</script> -->
