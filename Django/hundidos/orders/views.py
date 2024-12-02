@@ -308,7 +308,7 @@ def mark_pending(request, order_id):
 def order_list(request):
     paginator = Paginator(order_list, 10)  # 10 usuarios por página
     page_number = request.GET.get('page')
-    orders = Order.objects.all()  # Obtiene todos los pedidos
+    orders = Order.objects.filter(is_ordered=1)  # Obtiene todos los pedidos
     return render(request, 'order_list.html', {'orders': orders})
 
 @login_required
