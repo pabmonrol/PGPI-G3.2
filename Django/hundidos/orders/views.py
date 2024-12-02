@@ -16,7 +16,7 @@ import os
 from store.models import Product, Variation
 from carts.models import CartItem, Cart
 from accounts.models import UserProfile
-from .forms import OrderForm
+from .forms import OrderForm, OrderAdminForm
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -306,7 +306,6 @@ def mark_pending(request, order_id):
 @login_required
 @user_passes_test(lambda u: u.is_admin)
 def order_list(request):
-    order_list = OrderProduct.objects.all()
     paginator = Paginator(order_list, 10)  # 10 usuarios por página
     page_number = request.GET.get('page')
     orders = Order.objects.all()  # Obtiene todos los pedidos
@@ -320,13 +319,13 @@ def edit_order(request, order_id):
 
     # Si el formulario fue enviado
     if request.method == 'POST':
-        form = OrderForm(request.POST, instance=order)
+        form = OrderAdminForm(request.POST, instance=order)
         if form.is_valid():
             form.save()
             messages.success(request, 'La reserva se ha actualizado correctamente.')
             return redirect('order_list')  # Redirigir a la lista de reservas
     else:
-        form = OrderForm(instance=order)
+        form = OrderAdminForm(instance=order)
     
     return render(request, 'orders/edit_order.html', {'form': form, 'order_product': order})
 
