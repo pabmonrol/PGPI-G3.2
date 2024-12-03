@@ -28,7 +28,7 @@ class ProductForm(forms.ModelForm):
         if price is not None and price <= 0:
             self.add_error('price', 'El precio debe ser mayor que 0.')
         
-        if stock is not None and stock <= 0:
-            self.add_error('stock', 'La cantidad debe ser mayor que 0.')
+        if stock is not None and stock < 0:
+            self.add_error('stock', 'La cantidad debe ser mayor o igual que 0.')
 
         return cleaned_data

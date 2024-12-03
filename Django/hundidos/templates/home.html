@@ -28,7 +28,7 @@
 	{% for product in products %}
 	<div class="col-md-3">
 		<div class="card card-product-grid">
-            {% if product.is_available %}
+            {% if product.is_available and product.stock %}
 			<a href="{{ product.get_url }}" class="img-wrap"> 
                 <img src="{{ product.images.url }}"> 
             </a>

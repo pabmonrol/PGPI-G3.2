@@ -174,7 +174,7 @@
               <figure class="card card-product-grid">
                   <div class="img-wrap">
                       <img src="{{ product.images.url }}">
-                      {% if not product.is_available %}
+                      {% if not product.is_available or not product.stock %}
                       <div class="overlay">
                           <span class="badge badge-danger">No disponible</span>
                       </div>
@@ -183,7 +183,7 @@
                   <figcaption class="info-wrap">
                       <div class="fix-height">
                           <a 
-                              {% if product.is_available %}
+                              {% if product.is_available and product.stock %}
                               href="{{ product.get_url }}" 
                               {% else %}
                               class="text-muted disabled-link"
@@ -194,13 +194,13 @@
                           </div> <!-- price-wrap.// -->
                       </div>
                       <a 
-                          {% if product.is_available %}
+                          {% if product.is_available and product.stock %}
                           href="{% url 'add_cart' product.id %}" class="btn btn-block btn-success"
                           {% else %}
                           class="btn btn-block btn-secondary disabled-link"
                           {% endif %}
                       >
-                          {% if product.is_available %}Agregar al Carrito{% else %}No disponible{% endif %}
+                          {% if product.is_available and product.stock %}Agregar al Carrito{% else %}No disponible{% endif %}
                       </a>
                   </figcaption>
               </figure>
