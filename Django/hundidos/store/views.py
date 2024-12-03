@@ -83,7 +83,7 @@ def product_detail(request, category_slug, product_slug):
     eventos = []
     for reserva in reservas:
         eventos.append({
-            'title': f'Ocupado',  # Texto que aparecerá en el calendario
+            'title': f'Baja disponibilidad',  # Texto que aparecerá en el calendario
             'start': reserva.fecha_inicio.strftime('%Y-%m-%d'),  # Fecha inicio
             'end': (reserva.fecha_fin + timedelta(days=1)).strftime('%Y-%m-%d'),  # Fecha fin + 1 día
             'backgroundColor': 'red',  # Color del evento

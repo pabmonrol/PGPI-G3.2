@@ -197,11 +197,15 @@ def checkout(request, total=0, duracion=0, cart_items=None):
 
         for cart_item in cart_items:
             # Verificar solapamiento
-            conflicto = fechas_solapadas(cart_item.product, cart_item.fecha_inicio, cart_item.fecha_fin, excluido_id=cart_item.id)
-            if conflicto:
+            if not verificar_disponibilidad(
+                cart_item.product,
+                cart_item.fecha_inicio,
+                cart_item.fecha_fin,
+                cart_item.quantity
+            ):
                 messages.error(
                     request,
-                    f'El producto {conflicto.product.product_name} ya está reservado entre {conflicto.fecha_inicio} y {conflicto.fecha_fin}.'
+                    f'No hay suficiente stock disponible para el barco "{cart_item.product.product_name}" en las fechas seleccionadas ({cart_item.fecha_inicio} - {cart_item.fecha_fin}).'
                 )
                 return redirect('cart')
 
@@ -246,13 +250,17 @@ def update_cart(request):
             
 
             # Verificar solapamiento
-            conflicto = fechas_solapadas(cart_item.product, datetime.strptime(start_date, '%Y-%m-%d').date(), datetime.strptime(end_date, '%Y-%m-%d').date(), excluido_id=cart_item.id)
-            if conflicto:
+            if not verificar_disponibilidad(
+                cart_item.product,
+                cart_item.fecha_inicio,
+                cart_item.fecha_fin,
+                cart_item.quantity
+            ):
                 messages.error(
                     request,
-                    f'El producto {conflicto.product.product_name} ya está reservado entre {conflicto.fecha_inicio} y {conflicto.fecha_fin}.'
+                    f'No hay suficiente stock disponible para el barco "{cart_item.product.product_name}" en las fechas seleccionadas ({cart_item.fecha_inicio} - {cart_item.fecha_fin}).'
                 )
-                continue
+                return redirect('cart')
             
             cart_item.fecha_inicio = datetime.strptime(start_date, '%Y-%m-%d')
             cart_item.fecha_fin = datetime.strptime(end_date, '%Y-%m-%d')
@@ -275,3 +283,24 @@ def fechas_solapadas(producto, nueva_fecha_inicio, nueva_fecha_fin, excluido_id=
         ):
             return reserva  # Conflicto detectado
     return None
+
+def verificar_disponibilidad(producto, nueva_fecha_inicio, nueva_fecha_fin, cantidad_solicitada, excluido_id=None):
+    """
+    Verifica si el producto tiene suficiente stock disponible para las fechas solicitadas.
+    """
+    reservas = OrderProduct.objects.filter(product=producto)
+    if excluido_id:
+        reservas = reservas.exclude(id=excluido_id)
+
+    # Calcular la cantidad ya reservada en las fechas solicitadas
+    cantidad_reservada = 0
+    for reserva in reservas:
+        if (
+            nueva_fecha_inicio <= reserva.fecha_fin and
+            nueva_fecha_fin >= reserva.fecha_inicio
+        ):
+            cantidad_reservada += reserva.quantity
+
+    # Validar que la cantidad disponible sea suficiente
+    disponible = producto.stock - cantidad_reservada
+    return disponible >= cantidad_solicitada
