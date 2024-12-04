@@ -23,7 +23,7 @@
           <h4 class="card-title mb-4">Inicio de sesión</h4>
           <form action="{% url 'login' %}" method="POST">
               {% csrf_token %}
-
+              <input type="hidden" name="next" value="{{ next }}">
               <div class="form-group">
                  <input type="email" class="form-control" placeholder="Email" name="email" >
               </div> <!-- form-group// -->
