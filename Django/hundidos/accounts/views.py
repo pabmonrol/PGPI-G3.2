@@ -64,7 +64,6 @@ def register(request):
     }
     return render(request, 'accounts/register.html', context)   
 
-
 def login(request):
     if request.method == 'POST':
         email = request.POST['email']
@@ -74,34 +73,79 @@ def login(request):
 
         if user is not None:
             try:
-                # Manejo de carrito (tu lógica ya existente)
+                # Manejo del carrito anónimo al autenticarse
                 cart = Cart.objects.get(cart_id=_cart_id(request))
                 if CartItem.objects.filter(cart=cart).exists():
                     cart_items = CartItem.objects.filter(cart=cart)
+
+                    # Agregar las variaciones del carrito anónimo al carrito del usuario
+                    product_variation = []
                     for item in cart_items:
-                        item.user = user
-                        item.save()
+                        variation = item.variation.all()
+                        product_variation.append(list(variation))
+
+                    # Obtener variaciones ya existentes en el carrito del usuario
+                    cart_item = CartItem.objects.filter(user=user)
+                    ex_var_list = []
+                    id_list = []
+                    for item in cart_item:
+                        existing_variation = item.variation.all()
+                        ex_var_list.append(list(existing_variation))
+                        id_list.append(item.id)
+
+                    for pr in product_variation:
+                        if pr in ex_var_list:
+                            # Incrementar la cantidad si la variación ya existe
+                            index = ex_var_list.index(pr)
+                            item_id = id_list[index]
+                            item = CartItem.objects.get(id=item_id)
+                            item.quantity += 1
+                            item.user = user
+                            item.save()
+                        else:
+                            # Asociar las variaciones restantes con el usuario
+                            for item in cart_items:
+                                item.user = user
+                                item.save()
             except Cart.DoesNotExist:
                 pass
 
             auth.login(request, user)
             messages.success(request, 'Has iniciado sesión exitosamente')
 
-            # Redirigir a la página de `next` si está definida
+            # Redirigir a la página indicada en `next` o a la página principal
             next_url = request.POST.get('next') or request.GET.get('next') or 'home'
             return redirect(next_url)
-        else:
-            messages.error(request, 'Los datos son incorrectos')
-            return redirect('login')
 
-    # Si es GET, renderizar la página con el parámetro `next`
+        else:
+            # Si la autenticación falla
+            new_user = Account.get_user_by_email(email)
+            if new_user is None:
+                messages.error(request, 'Los datos son incorrectos')
+                return redirect('login')
+            elif new_user.is_active:
+                messages.error(request, 'Los datos son incorrectos')
+                return redirect('login')
+            else:
+                # Enviar correo de activación si el usuario no está activo
+                current_site = get_current_site(request)
+                mail_subject = 'Activa tu cuenta en Hundidos para continuar'
+                body = render_to_string('accounts/account_verification_email.html', {
+                    'user': new_user,
+                    'domain': current_site,
+                    'uid': urlsafe_base64_encode(force_bytes(new_user.pk)),
+                    'token': default_token_generator.make_token(new_user),
+                })
+                to_email = email
+                send_email = EmailMessage(mail_subject, body, to=[to_email])
+                send_email.send()
+                return redirect(f'/accounts/login/?command=verification&email={email}')
+
+    # Si es una solicitud GET, incluir el parámetro `next` en el contexto
     context = {
         'next': request.GET.get('next', ''),
     }
     return render(request, 'accounts/login.html', context)
-
-
-
 
 @login_required(login_url='login')
 def logout(request):
