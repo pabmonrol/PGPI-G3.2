@@ -20,6 +20,31 @@
         <div class="card">
           <article class="filter-group">
             <header class="card-header">
+              <a href="#" data-toggle="collapse" data-target="#collapse_2" aria-expanded="true" class="">
+                <i class="icon-control fa fa-chevron-down"></i>
+                <h6 class="title">Fechas</h6>
+              </a>
+            </header>
+            <form method="GET" action="{% url 'store' %}">
+              <div class="filter-content collapse show" id="collapse_2" style="">
+                <div class="card-body">
+                  <form method="GET" action="{% url 'store' %}">
+                    <div class="form-group">
+                      <label for="start_date">Fecha de Inicio</label>
+                      <input type="date" class="form-control" id="start_date" name="start_date" value="{{ start_date|date:'Y-m-d' }}">
+                    </div>
+                    <div class="form-group">
+                      <label for="end_date">Fecha de Fin</label>
+                      <input type="date" class="form-control" id="end_date" name="end_date" value="{{ end_date|date:'Y-m-d' }}">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Filtrar</button>
+                  </form>
+                </div> <!-- card-body.// -->
+              </div>
+
+
+          <article class="filter-group">
+            <header class="card-header">
               <a href="#" data-toggle="collapse" data-target="#collapse_1" aria-expanded="true" class="">
                 <i class="icon-control fa fa-chevron-down"></i>
                 <h6 class="title">Categorias</h6>
@@ -174,7 +199,7 @@
               <figure class="card card-product-grid">
                   <div class="img-wrap">
                       <img src="{{ product.images.url }}">
-                      {% if not product.is_available or not product.stock %}
+                      {% if not product.is_available or not product.stock or product.id in unavailable_products %}
                       <div class="overlay">
                           <span class="badge badge-danger">No disponible</span>
                       </div>
@@ -183,7 +208,7 @@
                   <figcaption class="info-wrap">
                       <div class="fix-height">
                           <a 
-                              {% if product.is_available and product.stock %}
+                              {% if product.is_available and product.stock and not product.id in unavailable_products %}
                               href="{{ product.get_url }}" 
                               {% else %}
                               class="text-muted disabled-link"
@@ -194,13 +219,13 @@
                           </div> <!-- price-wrap.// -->
                       </div>
                       <a 
-                          {% if product.is_available and product.stock %}
+                          {% if product.is_available and product.stock and not product.id in unavailable_products %}
                           href="{% url 'add_cart' product.id %}" class="btn btn-block btn-success"
                           {% else %}
                           class="btn btn-block btn-secondary disabled-link"
                           {% endif %}
                       >
-                          {% if product.is_available and product.stock %}Agregar al Carrito{% else %}No disponible{% endif %}
+                          {% if product.is_available and product.stock and not product.id in unavailable_products %}Agregar al Carrito{% else %}No disponible{% endif %}
                       </a>
                   </figcaption>
               </figure>
