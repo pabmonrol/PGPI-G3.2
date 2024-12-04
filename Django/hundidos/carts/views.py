@@ -205,7 +205,7 @@ def checkout(request, total=0, duracion=0, cart_items=None):
             ):
                 messages.error(
                     request,
-                    f'No hay suficiente stock disponible para el barco "{cart_item.product.product_name}" en las fechas seleccionadas ({cart_item.fecha_inicio} - {cart_item.fecha_fin}).'
+                    f'No hay suficientes unidades disponible para el barco "{cart_item.product.product_name}" en las fechas seleccionadas ({cart_item.fecha_inicio} - {cart_item.fecha_fin}).'
                 )
                 return redirect('cart')
 
@@ -258,7 +258,7 @@ def update_cart(request):
             ):
                 messages.error(
                     request,
-                    f'No hay suficiente stock disponible para el barco "{cart_item.product.product_name}" en las fechas seleccionadas ({cart_item.fecha_inicio} - {cart_item.fecha_fin}).'
+                    f'No hay suficientes unidades disponible para el barco "{cart_item.product.product_name}" en las fechas seleccionadas ({cart_item.fecha_inicio} - {cart_item.fecha_fin}).'
                 )
                 return redirect('cart')
             
