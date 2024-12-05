@@ -3,205 +3,181 @@
 
 {% block content %}
 <section class="section-content padding-y bg">
-    <div class="container">
-
+  <div class="container">
     <!-- ============================ COMPONENT 1 ================================= -->
     <div class="row">
-        <aside class="col-lg-8">
-    <div class="card">
-          <h5 class="card-header">Mis datos personales</h5>
+      <aside class="col-lg-8">
+        <div class="card">
           <div class="card-body">
-            <p class="card-text mb-0">Nombres y Apellidos: {{ order.full_name }}</p>
-            <p class="card-text mb-0">Dirección: {{ order.full_address }}</p>
-            <p class="card-text mb-0">Pais: {{ order.country }}</p>
-            <p class="card-text mb-0">Ciudad: {{ order.city }}</p>
-            <p class="card-text mb-0">CP: {{ order.state }}</p>
-            <p class="card-text mb-0">Email de contacto: {{ order.email }}</p>
-            <p class="card-text mb-0">Móvil: {{ order.phone }}</p>
-            <!-- 
-            {% if order.order_note %}
-                <b>Detalles de la orden: </b> {{ order.order_note }}
-            {% endif %} -->
-
-          </div>
-    </div> <!-- card.// -->
-
-    <div class="card">
-          <h5 class="card-header">Detalles de la Reserva</h5>
-          <div class="card-body">
-            <!--<p class="card-text">Paypal</p>-->
-            <!-- Detalle de la orden (order.order_note) es utilizado como código de seguimiento -->
-            <p class="card-text mb-0">Código de Seguimiento: {{ order.order_note }}</p>
-          </div>
-    </div> <!-- card.// -->
-
-    <div class="card">
-          <div class="card-body">
-            <table class="table table-borderless table-shopping-cart">
-            <thead class="text-muted">
-            <tr class="small text-uppercase">
-              <th scope="col" style="width: 10%;">EMBARCACIÓN(ES)</th>
-              <th scope="col" style="width: 50%;">Detalles</th>
-              <th scope="col" style="width: 20%;">Cantidad</th>
-              <th scope="col" style="width: 20%;">Precio</th>
-            </tr>
-            </thead>
-            <tbody>
-            {% for cart_item in cart_items %}
-            <tr>
-                <td>
-                    <figure class="itemside align-items-center">
-                        <div class="aside"><img src="{{ cart_item.product.images.url }}" class="img-sm"></div>
-                        <figcaption class="info">
-                            <a href="{{ cart_item.product.get_url }}" class="title text-dark"></a>
-                            <p class="text-muted small">
-                              {% if cart_item.variation.all %}
-                                {% for item in cart_item.variation.all %}
-                                  {{ item.variation_category | capfirst }} : {{ item.variation_value | capfirst }} <br>
-                                {% endfor %}
-                              {% endif %}
-                            </p>
-                        </figcaption>
-                    </figure>
-                </td>
-                <td>
-                  <strong>{{ cart_item.product.product_name }}</strong>
-                  <p class="text-muted small mb-0">{{ cart_item.product.description }}</p>
-                  <p class="text-muted small mb-0"><strong>Puerto:</strong> {{ cart_item.product.puerto }}</p>
-                  <p class="text-muted small mb-0"><strong>Fabricante:</strong> {{ cart_item.product.fabricante }}</p>
-                  <p class="text-muted small mb-0"><strong>Categoría:</strong> {{ cart_item.product.category_id }}</p>
-                  <p class="highlighted-date">{{ cart_item.fecha_inicio|date:'Y-m-d' }}</p>
-                  <p class="highlighted-date">{{ cart_item.fecha_fin|date:'Y-m-d' }}</p>
-                </td>
-                <td>
-                  <label for="">{{ cart_item.quantity }}</label>
-                </td>
-                <td>
-                    <div class="price-wrap">
-                        <var class="price">{{ cart_item.sub_total }}€</var>
-                        <small class="text-muted"> {{ cart_item.product.price }}€/día </small>
-                    </div> <!-- price-wrap .// -->
-                </td>
-
-            </tr>
-            {% endfor %}
-            </tbody>
-            </table>
-
-          </div>
-    </div> <!-- card.// -->
-
-        </aside> <!-- col.// -->
-        <aside class="col-lg-4">
-
-            <div class="card">
-            <div class="card-body">
-                <dl class="dlist-align">
-                  <dt>Precio Total:</dt>
-                  <dd class="text-right">{{ total }}€</dd>
-                </dl>
-                <dl class="dlist-align">
-                  <dt>Tasa combustible:</dt>
-                  <dd class="text-right"> {{ extra_combustible }}€</dd>
-                </dl>
-                <dl class="dlist-align">
-                  <dt>Impuesto IVA (21%):</dt>
-                  <dd class="text-right"> {{ tax }}€</dd>
-                </dl>
-                <dl class="dlist-align">
-                  <dt>Total:</dt>
-                  <dd class="text-right text-dark b"><strong>{{ grand_total }}€</strong></dd>
-                </dl>                
-                <dl class="dlist-align">
-                  <dt class="text-right text-dark b"><strong>ATENCION:</strong></dt>
-                  <dd class="text-right text-dark b"><strong>En caso que desee cancelar la reserva no se devolverá el importe</strong></dd>
-                </dl>
-                <hr>
-                <p class="text-center mb-3">
-                    <img src="{% static './images/misc/payments.png' %}" height="26">
-                </p>
-
-                <div id="paypal-button-container"></div>
-                <a href="{% url 'mark_pending' order.id %}" class="btn btn-light btn-block">Pago Contrareembolso</a>
-        
-            </div> <!-- card-body.// -->
+            <h4 class="card-title mb-4">Paso 3: Confirmación de tu Reserva</h4>
+            <p class="text-muted">Revisa los detalles de tu reserva antes de finalizar.</p> 
+            <hr>
+            <!-- Resaltar el código de seguimiento -->
+            <div class="card-body text-center">
+              <p class="text-center text-muted" style="border: 2px solid #007bff; padding: 10px; border-radius: 5px;">
+                Tu código de seguimiento: 
+                <span class="text-primary"><strong>{{ order.order_note }}</strong></span>
+              </p>
             </div> <!-- card.// -->
-
-    </aside> <!-- col.// -->
-
-
+            <h5 class="text-primary mb-3" style="font-weight: bold;">Información del Cliente</h5>
+            <ul style="list-style: none; padding: 0;">
+              <li class="mb-2"><strong>Nombres y Apellidos:</strong> <span class="text-muted">{{ order.full_name }}</span></li>
+              <li class="mb-2"><strong>Email de contacto:</strong> <span class="text-muted">{{ order.email }}</span></li>
+              <li class="mb-2"><strong>Móvil:</strong> <span class="text-muted">{{ order.phone }}</span></li>
+              <li class="mb-2"><strong>Dirección:</strong> <span class="text-muted">{{ order.full_address }}</span></li>
+              <li class="mb-2"><strong>País:</strong> <span class="text-muted">{{ order.country }}</span></li>
+              <li class="mb-2"><strong>Ciudad:</strong> <span class="text-muted">{{ order.city }}</span></li>
+              <li class="mb-2"><strong>Cód. Postal:</strong> <span class="text-muted">{{ order.state }}</span></li> 
+            </ul>
+            <hr>
+            <h5 class="text-primary mb-3" style="font-weight: bold;">Detalles de la reserva</h5>
+            <table class="table table-borderless table-shopping-cart">
+              <thead class="text-light bg-primary">
+                <tr class="small text-uppercase text-center">
+                  <th scope="col" style="width: 10%;">Embarcación</th>
+                  <th scope="col" style="width: 50%;">Detalles</th>
+                  <th scope="col" style="width: 15%;">Cantidad</th>
+                  <th scope="col" style="width: 25%;">Precio</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for cart_item in cart_items %}
+                <tr class="table-light">
+                  <td class="text-center align-middle">
+                    <img src="{{ cart_item.product.images.url }}" class="img-fluid rounded shadow-sm" style="width: 70px; height: 70px;">
+                  </td>
+                  <td class="align-middle">
+                    <h6 class="mb-0">{{ cart_item.product.product_name }}</h6>
+                    <p class="text-muted small mb-1">{{ cart_item.product.description }}</p>
+                    <p class="text-muted small mb-0"><strong>Puerto:</strong> {{ cart_item.product.puerto }}</p>
+                    <p class="text-muted small mb-0"><strong>Fabricante:</strong> {{ cart_item.product.fabricante }}</p>
+                    <p class="text-muted small mb-0"><strong>Categoría:</strong> {{ cart_item.product.category_id }}</p>
+                    <p class="text-muted small mb-0">
+                      <i class="fa fa-calendar"></i> <strong>Fecha de Inicio:</strong> {{ cart_item.fecha_inicio|date:'d-m-Y' }}
+                    </p>
+                    <p class="text-muted small mb-0">
+                        <i class="fa fa-calendar"></i> <strong>Fecha de Fin:</strong> {{ cart_item.fecha_fin|date:'d-m-Y' }}
+                    </p>
+                  </td>
+                  <td class="text-center align-middle">
+                    <span style="font-size: 1rem;">{{ cart_item.quantity }}</span>
+                  </td>
+                  <td class="text-right align-middle">
+                    <strong class="text-success">{{ cart_item.sub_total }}€</strong>
+                    <p class="text-muted small mb-0">{{ cart_item.product.price }}€/día</p>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          
+          </div>
+        </div> <!-- card.// -->
+      </aside> <!-- col.// -->
+      <aside class="col-lg-4">
+        <div class="card">
+          <div class="card-body">
+            <dl class="dlist-align">
+              <dt>Precio Total:</dt>
+              <dd class="text-right">{{ total }}€</dd>
+            </dl>
+            <dl class="dlist-align">
+              <dt>Tasa combustible:</dt>
+              <dd class="text-right"> {{ extra_combustible }}€</dd>
+            </dl>
+            <dl class="dlist-align">
+              <dt>Impuesto IVA (21%):</dt>
+              <dd class="text-right"> {{ tax }}€</dd>
+            </dl>
+            <dl class="dlist-align">
+              <dt>Total:</dt>
+              <dd class="text-right text-dark b"><strong>{{ grand_total }}€</strong></dd>
+            </dl>                
+            <dl class="dlist-align">
+              <dt class="text-right text-dark b"><strong>ATENCIÓN:</strong></dt>
+              <dd class="text-right text-dark b"><strong>En caso que desee cancelar la reserva no se devolverá el importe</strong></dd>
+            </dl>
+            <hr>
+            <p class="text-center mb-3">
+              <img src="{% static './images/misc/payments.png' %}" height="26">
+            </p>
+            <div id="paypal-button-container"></div>
+            <a href="{% url 'mark_pending' order.id %}" class="btn btn-light btn-block">Pagar al momento de entrega</a>
+          </div> <!-- card-body.// -->
+        </div> <!-- card.// -->
+      </aside> <!-- col.// -->
     </div> <!-- row.// -->
-    <!-- ============================ COMPONENT 1 END .// ================================= -->
-      <script>
-        function getCookie(name) {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                const cookies = document.cookie.split(';');
-                for (let i = 0; i < cookies.length; i++) {
-                    const cookie = cookies[i].trim();
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
-                }
-            }
-            return cookieValue;
-        }
-    
-        const csrftoken = getCookie('csrftoken');
-        const url = "{% url 'payments' order.order_number %}";
-        var redirect_url = "{% url 'order_complete' %}"
-    
+  </div> <!-- container.// -->
+</section>
 
-        
-        paypal.Buttons({
-            createOrder: function (data, actions) {
-                return actions.order.create({
-                    purchase_units: [{
-                        amount: { value: "{{ grand_total }}" }
-                    }]
-                });
-            },
-            onApprove: function (data, actions) {
-                return actions.order.capture().then(function (orderData) {
-                    fetch(url, {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                            "X-CSRFToken": csrftoken
-                        },
-                        body: JSON.stringify({
-                            orderID: "{{ order.order_number }}",
-                            transID: orderData.id,
-                            payment_method: 'Paypal',
-                            status: 'Pagado',
-                            is_ordered: 1
-                        }),
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        window.location.href = '/store/search/?keyword=&reservation=' + data.order_note;// + '&payment_id=' + data.transID;
-                    });
-                });
-            },
+    <!-- ============================ COMPONENT 1 END .// ================================= -->
+    <script>
+      function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+          const cookies = document.cookie.split(';');
+          for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+              cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+              break;
+            }
+          }
+        }
+        return cookieValue;
+      }
+
+      const csrftoken = getCookie('csrftoken');
+      const url = "{% url 'payments' order.order_number %}";
+      var redirect_url = "{% url 'order_complete' %}"
+      
+      paypal.Buttons({
+        createOrder: function (data, actions) {
+          return actions.order.create({
+            purchase_units: [{
+              amount: { value: "{{ grand_total }}" }
+            }]
+          });
+        },
+        onApprove: function (data, actions) {
+          return actions.order.capture().then(function (orderData) {
+            fetch(url, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": csrftoken
+              },
+              body: JSON.stringify({
+                orderID: "{{ order.order_number }}",
+                transID: orderData.id,
+                payment_method: 'Paypal',
+                status: 'Pagado',
+                is_ordered: 1
+              }),
+            })
+            .then(response => response.json())
+            .then(data => {
+              window.location.href = '/store/search/?keyword=&reservation=' + data.order_note;// + '&payment_id=' + data.transID;
+              });
+            });
+          },
         }).render('#paypal-button-container');
     </script>
-       
-    </div> <!-- container .//  -->
-    </section>
-     
-    <!-- ========================= SECTION CONTENT END// ========================= -->
-    <style>
-      .highlighted-date {
-          font-weight: bold;
-          color: #ffffff; /* Texto en blanco */
-          background-color: #007bff; /* Fondo azul */
-          padding: 5px 10px; /* Espaciado interno */
-          border-radius: 5px; /* Bordes redondeados */
-          display: inline-block; /* Asegura que el fondo se ajuste al contenido */
-          margin: 5px 0; /* Espaciado entre fechas */
-      }
-  </style>
+  </div> <!-- container .//  -->
+</section>
+<!-- ========================= SECTION CONTENT END// ========================= -->
+ 
+ <style>
+  .highlighted-date {
+    font-weight: bold;
+    color: #ffffff; /* Texto en blanco */
+    background-color: #007bff; /* Fondo azul */
+    padding: 5px 10px; /* Espaciado interno */
+    border-radius: 5px; /* Bordes redondeados */
+    display: inline-block; /* Asegura que el fondo se ajuste al contenido */
+    margin: 5px 0; /* Espaciado entre fechas */
+  }
+</style>
 {% endblock %}
 
 <!-- <script>
@@ -217,13 +193,9 @@
         }
       }
     }
-
     return cookieValue;
   }
-
-
   var amount = "{{ grand_total }}"
-
   var csrftoken = getCookie('csrftoken');
   var orderID = "{{ order.order_number }}"
   var url = "{% url 'payments' order.order_number %}"
@@ -233,9 +205,6 @@
   if (userAuth) {
     redirect_url = "/accounts/my_orders/"
   }
-  
-  
-
   paypal.Buttons({
 
       createOrder: function(data, actions){
@@ -247,7 +216,6 @@
             }]
         });
       },
-
       // Finalize the transaction on the server after payer approval
       onApprove: function(data, actions) {
           return actions.order.capture().then(function(orderData) {
