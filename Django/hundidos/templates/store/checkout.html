@@ -19,7 +19,14 @@
             <div class="card">
                 <div class="card-body">
                     <h4 class="card-title mb-4">Mis datos</h4>
-                    <a href="{% url 'login' %}?next={{ request.path }}">Inicia sesión aquí</a>
+                    <p class="text-muted">
+                        <i class="fa fa-info-circle mr-1"></i>
+                        ¿Ya tienes una cuenta? 
+                        <a href="{% url 'login' %}?next={{ request.path }}" class="text-primary font-weight-bold">
+                            Inicia sesión
+                        </a>
+                        para rellenar automáticamente tus datos.
+                    </p>                    
                     <form action="{% url 'place_order' %}" method="post">
                         {% csrf_token %}
                         <div class="form-row">
