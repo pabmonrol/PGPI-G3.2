@@ -1,0 +1,40 @@
+{% autoescape off %}
+Estimado/a {{ nombre }},
+
+Gracias por realizar su alquiler en Hundidos S.L.
+Hemos recibido tu orden con número {{ order.order_number }}.
+
+Detalles de tu reserva:
+- Código de seguimiento: {{ order.order_note }}
+- Nombre Completo: {{ order.full_name }}
+- Dirección: {{ order.full_address }}
+- País: {{ order.country }}
+- Ciudad: {{ order.city }}
+- Código Postal: {{ order.state }}
+- Email: {{ order.email }}
+- Teléfono: {{ order.phone }}
+
+Barcos reservados:
+{% for item in cart_items %}
+- Producto: {{ item.product.product_name }}
+  - Puerto: {{ item.product.puerto }}
+  - Capacidad: {{ item.product.capacidad }} personas
+  - Fabricante: {{ item.product.fabricante }}
+  - Categoría: {{ item.product.category.category_name }}
+  - Cantidad: {{ item.quantity }}
+  - Precio: €{{ item.product.price }}
+  - Fecha de Inicio: {{ item.fecha_inicio }} 
+  - Fecha de Fin: {{ item.fecha_fin }}
+{% endfor %}
+
+Importe total: €{{ order.order_total }}
+
+El pago se ha procesado de forma exitosa.
+
+Hora de salida: 8:00 AM
+Recuerde que debe estar presente en el puerto 30 minutos antes de la hora de salida.
+
+Para obtener ayuda adicional, visite nuestro Centro de soporte.
+Este es un mensaje automático, por favor, no respondas.
+
+{% endautoescape %}

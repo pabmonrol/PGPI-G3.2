@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-5">
+    <div class="card">
+        {% if messages %}
+            <div class="alert alert-success">
+                {% for message in messages %}
+                    <p>{{ message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+        <div class="card-header">
+            <h3 class="mb-0">Lista de Usuarios <a href="{% url 'create_users' %}" class="btn btn-primary">Crear</a></h3>
+           
+        </div>
+        <div class="card-body">
+            <table class="table table-bordered table-hover">
+                <thead class="thead-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Email</th>
+                        <th>¿Es Administrador?</th>
+                        <th>Fecha de Creación</th>
+                        <th>Última Actualización</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr>
+                        <td>{{ user.id }}</td>
+                        <td>{{ user.first_name }}</td>
+                        <td>{{ user.email }}</td>
+                        <td>{{ user.is_admin|yesno:"Sí,No" }}</td>
+                        <td>{{ user.date_joinded|date:"d/m/Y H:i" }}</td>
+                        <td>{{ user.last_login|date:"d/m/Y H:i" }}</td>
+                        <td>
+                            <a href="{% url 'edit_user' user.id %}" class="btn btn-primary">Editar</a>
+                            <a href="{% url 'delete_user' user.id %}" class="btn btn-primary">Eliminar</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center">No hay usuarios para mostrar</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <nav class="mt-4" aria-label="Page navigation">
+        {% if users.has_other_pages %}
+        <ul class="pagination justify-content-center">
+            {% if users.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ users.previous_page_number }}">Anterior</a>
+            </li>
+            {% else %}
+            <li class="page-item disabled">
+                <a class="page-link" href="#">Anterior</a>
+            </li>
+            {% endif %}
+
+            {% for i in users.paginator.page_range %}
+            {% if users.number == i %}
+            <li class="page-item active">
+                <a class="page-link" href="#">{{ i }}</a>
+            </li>
+            {% else %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ i }}">{{ i }}</a>
+            </li>
+            {% endif %}
+            {% endfor %}
+
+            {% if users.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ users.next_page_number }}">Siguiente</a>
+            </li>
+            {% else %}
+            <li class="page-item disabled">
+                <a class="page-link" href="#">Siguiente</a>
+            </li>
+            {% endif %}
+        </ul>
+        {% endif %}
+    </nav>
+</div>
+
+
+{% endblock %}

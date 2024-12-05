@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<!-- ========================= SECTION CONTENT ========================= -->
+<section class="section-content padding-y">
+
+    <!-- ============================ COMPONENT EDIT SHIP   ================================= -->
+    <div class="card mx-auto" style="max-width:520px; margin-top:40px;">
+        <article class="card-body">
+            {% include 'includes/alerts.html' %}
+            <header class="mb-4"><h4 class="card-title">Editar Barco</h4></header>
+            <form action="{% url 'edit_ship' ship.id %}" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <!-- Imagen del Barco -->
+                <div class="form-group">
+                    <label for="{{ form.images.id_for_label }}">Imagen del Barco</label><br>
+                    {{ form.images }}
+                    {% for error in form.images.errors %}
+                        <div class="text-danger">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <!-- Nombre del Barco -->
+                <div class="form-group">
+                    <label for="{{ form.product_name.id_for_label }}">Nombre del Barco</label><br>
+                    {{ form.product_name }}
+                    {% for error in form.product_name.errors %}
+                        <div class="text-danger">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <!-- Descripción -->
+                <div class="form-group">
+                    <label for="{{ form.description.id_for_label }}">Descripción</label><br>
+                    {{ form.description }}
+                    {% for error in form.description.errors %}
+                        <div class="text-danger">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <!-- Precio y Capacidad -->
+                <div class="form-row">
+                    <div class="col form-group">
+                        <label for="{{ form.price.id_for_label }}">Precio</label><br>
+                        {{ form.price }}
+                        {% for error in form.price.errors %}
+                            <div class="text-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="col form-group">
+                        <label for="{{ form.capacidad.id_for_label }}">Capacidad</label><br>
+                        {{ form.capacidad }}
+                        {% for error in form.capacidad.errors %}
+                            <div class="text-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="col form-group">
+                        <label for="{{ form.stock.id_for_label }}">Cantidad</label><br>
+                        {{ form.stock }}
+                        {% for error in form.stock.errors %}
+                            <div class="text-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Categoría -->
+                <div class="form-group">
+                    <label for="{{ form.category.id_for_label }}">Categoría</label><br>
+                    {{ form.category }}
+                    {% for error in form.category.errors %}
+                        <div class="text-danger">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <!-- Fabricante y Puerto -->
+                <div class="form-row">
+                    <div class="col form-group">
+                        <label for="{{ form.fabricante.id_for_label }}">Fabricante</label><br>
+                        {{ form.fabricante }}
+                        {% for error in form.fabricante.errors %}
+                            <div class="text-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="col form-group">
+                        <label for="{{ form.puerto.id_for_label }}">Puerto</label><br>
+                        {{ form.puerto }}
+                        {% for error in form.puerto.errors %}
+                            <div class="text-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Mostrar errores generales del formulario -->
+                {% if form.non_field_errors %}
+                <div class="form-group">
+                    <ul class="text-danger">
+                        {% for error in form.non_field_errors %}
+                        <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                <!-- Botón de submit -->
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary btn-block">Actualizar Barco</button>
+                </div>
+            </form>
+        </article>
+    </div>
+    <p class="text-center mt-4"><a href="{% url 'product_list' %}">Volver a la lista de barcos</a></p>
+    <br><br>
+    <!-- ============================ COMPONENT EDIT SHIP END.// ================================= -->
+
+</section>
+<!-- ========================= SECTION CONTENT END// ========================= -->
+
+{% endblock %}

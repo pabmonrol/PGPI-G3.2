@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<!-- ========================= SECTION CONTENT ========================= -->
+<section class="section-content padding-y">
+
+    <!-- ============================ COMPONENT EDIT ORDER ================================= -->
+    <div class="card mx-auto" style="max-width:520px; margin-top:40px;">
+        <article class="card-body">
+            {% include 'includes/alerts.html' %}
+            <header class="mb-4"><h4 class="card-title">Editar Pedido</h4></header>
+            <form method="POST">
+                {% csrf_token %}
+
+                <!-- Nombre -->
+                <div class="form-row">
+                    <div class="col form-group">
+                        <label for="{{ form.first_name.id_for_label }}">Nombre</label><br>
+                        {{ form.first_name }}
+                        {% for error in form.first_name.errors %}
+                            <div class="text-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                <!-- Apellido -->
+                    <div class="col form-group">
+                        <label for="{{ form.last_name.id_for_label }}">Apellidos</label><br>
+                        {{ form.last_name }}
+                        {% for error in form.last_name.errors %}
+                            <div class="text-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <!-- Teléfono -->
+                <div class="form-group">
+                    <label for="{{ form.phone.id_for_label }}">Teléfono</label><br>
+                    {{ form.phone }}
+                    {% for error in form.phone.errors %}
+                        <div class="text-danger">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <!-- Correo Electrónico -->
+                <div class="form-group">
+                    <label for="{{ form.email.id_for_label }}">Correo Electrónico</label><br>
+                    {{ form.email }}
+                    {% for error in form.email.errors %}
+                        <div class="text-danger">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <!-- Dirección Línea 1 -->
+                <div class="form-row">
+                    <div class="col form-group">
+                        <label for="{{ form.address_line_1.id_for_label }}">Dirección Línea 1</label><br>
+                        {{ form.address_line_1 }}
+                        {% for error in form.address_line_1.errors %}
+                            <div class="text-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                <!-- Dirección Línea 2 -->
+                    <div class="col form-group">
+                        <label for="{{ form.address_line_2.id_for_label }}">Dirección Línea 2</label><br>
+                        {{ form.address_line_2 }}
+                        {% for error in form.address_line_2.errors %}
+                            <div class="text-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <!-- País y Ciudad -->
+                <div class="form-row">
+                    <div class="col form-group">
+                        <label for="{{ form.country.id_for_label }}">País</label><br>
+                        {{ form.country }}
+                        {% for error in form.country.errors %}
+                            <div class="text-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="col form-group">
+                        <label for="{{ form.city.id_for_label }}">Ciudad</label><br>
+                        {{ form.city }}
+                        {% for error in form.city.errors %}
+                            <div class="text-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Código Postal -->
+                <div class="form-group">
+                    <label for="{{ form.state.id_for_label }}">Código Postal</label><br>
+                    {{ form.state }}
+                    {% for error in form.state.errors %}
+                        <div class="text-danger">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <!-- Estado -->
+                <div class="form-group">
+                    <label for="{{ form.status.id_for_label }}">Estado</label><br>
+                    {{ form.status }}
+                    {% for error in form.status.errors %}
+                        <div class="text-danger">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <!-- Mostrar errores generales del formulario -->
+                {% if form.non_field_errors %}
+                <div class="form-group">
+                    <ul class="text-danger">
+                        {% for error in form.non_field_errors %}
+                        <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                <!-- Botón de submit -->
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary btn-block">Actualizar Pedido</button>
+                </div>
+            </form>
+        </article>
+    </div>
+    <p class="text-center mt-4"><a href="{% url 'order_list' %}">Volver a la lista de pedidos</a></p>
+    <br><br>
+    <!-- ============================ COMPONENT EDIT ORDER END.// ================================= -->
+
+</section>
+<!-- ========================= SECTION CONTENT END// ========================= -->
+
+{% endblock %}

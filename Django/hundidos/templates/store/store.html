@@ -1,0 +1,288 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<section class="section-pagetop bg">
+  <div class="container">
+    <h2 class="title-page">Nuestras embarcaciones</h2>
+
+  </div> <!-- container //  -->
+</section>
+
+
+
+<section class="section-content padding-y">
+  <div class="container">
+
+    <div class="row">
+      <aside class="col-md-3">
+
+        <div class="card">
+          <article class="filter-group">
+            <header class="card-header">
+              <a href="#" data-toggle="collapse" data-target="#collapse_2" aria-expanded="true" class="">
+                <i class="icon-control fa fa-chevron-down"></i>
+                <h6 class="title">Fechas</h6>
+              </a>
+            </header>
+            <form method="GET" action="{% url 'store' %}">
+              <div class="filter-content collapse show" id="collapse_2" style="">
+                <div class="card-body">
+                  <form method="GET" action="{% url 'store' %}">
+                    <div class="form-group">
+                      <label for="start_date">Fecha de Inicio</label>
+                      <input type="date" class="form-control" id="start_date" name="start_date" value="{{ start_date|date:'Y-m-d' }}">
+                    </div>
+                    <div class="form-group">
+                      <label for="end_date">Fecha de Fin</label>
+                      <input type="date" class="form-control" id="end_date" name="end_date" value="{{ end_date|date:'Y-m-d' }}">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Filtrar</button>
+                  </form>
+                </div> <!-- card-body.// -->
+              </div>
+
+
+          <article class="filter-group">
+            <header class="card-header">
+              <a href="#" data-toggle="collapse" data-target="#collapse_1" aria-expanded="true" class="">
+                <i class="icon-control fa fa-chevron-down"></i>
+                <h6 class="title">Categorias</h6>
+              </a>
+            </header>
+            <div class="filter-content collapse show" id="collapse_1" style="">
+              <div class="card-body">
+
+                <ul class="list-menu">
+
+                  <li><a href="{% url 'store' %}">Mostrar Todos</a></li>
+                  {% for category in links %}
+                  <li>
+                    <input type="checkbox" name="categoria" value="{{ category.category_name }}" 
+                    {% if category.category_name in selected_category %}checked{% endif %}>
+                    {{ category.category_name}}
+                  </li>
+                  {% endfor %}
+                </ul>
+
+              </div> <!-- card-body.// -->
+            </div>
+          </article> <!-- filter-group  .// -->
+
+          <article class="filter-group">
+            <header class="card-header">
+              <a href="#" data-toggle="collapse" data-target="#collapse_4" aria-expanded="true" class="">
+                <i class="icon-control fa fa-chevron-down"></i>
+                <h6 class="title">Puerto</h6>
+              </a>
+            </header>
+            <form method="GET" action="{% url 'store' %}">
+              <div class="filter-content collapse show" id="collapse_4" style="">
+                <div class="card-body">
+                  <ul class="list-menu">
+                    {% for puerto in puertos %}
+                    <li>
+                      <input type="checkbox" name="puerto" value="{{ puerto.nombre }}" 
+                        {% if puerto.nombre in selected_puerto %}checked{% endif %}>
+                      {{ puerto.nombre }}
+                      {% endfor %}
+                    </li>
+                  </ul>
+                </div>
+        
+              </div>
+
+              <header class="card-header">
+                <a href="#" data-toggle="collapse" data-target="#collapse_5" aria-expanded="true" class="">
+                  <i class="icon-control fa fa-chevron-down"></i>
+                  <h6 class="title">Fabricante</h6>
+                </a>
+              </header>
+              <div class="filter-content collapse show" id="collapse_5" style="">
+                <div class="card-body">
+                  <ul class="list-menu">
+                    {% for fabricante in fabricantes %}
+                    <li>
+                      <input type="checkbox" name="fabricante" value="{{ fabricante.nombre }}" 
+                        {% if fabricante.nombre in selected_fabricante %}checked{% endif %}>
+                      {{ fabricante.nombre }}
+                      {% endfor %}
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+
+              <header class="card-header">
+                <a href="#" data-toggle="collapse" data-target="#collapse_3" aria-expanded="true" class="">
+                  <i class="icon-control fa fa-chevron-down"></i>
+                  <h6 class="title">Precios </h6>
+                </a>
+              </header>
+              <div class="filter-content collapse show" id="collapse_3" style="">
+                <div class="card-body">
+  
+                  <div class="form-row">
+                    <div class="form-group col-md-6">
+                      <label>Precio Mínimo</label>
+                      <!-- <input class="form-control" placeholder="0€" type="number"> -->
+                      <select class="mr-2 form-control" name="min_price">
+                        <option value="0" {% if request.GET.min_price == "0" %}selected{% endif %}>0€</option>
+                        <option value="50" {% if request.GET.min_price == "50" %}selected{% endif %}>50€</option>
+                        <option value="100" {% if request.GET.min_price == "100" %}selected{% endif %}>100€</option>
+                        <option value="150" {% if request.GET.min_price == "150" %}selected{% endif %}>150€</option>
+                        <option value="200" {% if request.GET.min_price == "200" %}selected{% endif %}>200€</option>
+                        <option value="500" {% if request.GET.min_price == "500" %}selected{% endif %}>500€</option>
+                        <option value="1000" {% if request.GET.min_price == "1000" %}selected{% endif %}>1000€</option>
+                      </select>
+                    </div>
+                    <div class="form-group text-right col-md-6">
+                      <label>Precio Máximo</label>
+                      <select class="mr-2 form-control" name="max_price">
+                        <option value="50" {% if request.GET.max_price == "50" %}selected{% endif %}>50€</option>
+                        <option value="100" {% if request.GET.max_price == "100" %}selected{% endif %}>100€</option>
+                        <option value="150" {% if request.GET.max_price == "150" %}selected{% endif %}>150€</option>
+                        <option value="200" {% if request.GET.max_price == "200" %}selected{% endif %}>200€</option>
+                        <option value="500" {% if request.GET.max_price == "500" %}selected{% endif %}>500€</option>
+                        <option value="1000" {% if request.GET.max_price == "1000" %}selected{% endif %}>1000€</option>
+                        <option value="2000" {% if request.GET.max_price == "2000" %}selected{% endif %}>2000€+</option>
+                      </select>
+                    </div>
+                  </div> <!-- form-row.// -->
+                </div><!-- card-body.// -->
+              </div>
+              
+
+              <header class="card-header">
+                <a href="#" data-toggle="collapse" data-target="#collapse_6" aria-expanded="true" class="">
+                  <i class="icon-control fa fa-chevron-down"></i>
+                  <h6 class="title">Capacidad</h6>
+                </a>
+              </header>
+              <div class="filter-content collapse show" id="collapse_6" style="">
+                <div class="card-body">
+                  <ul class="list-menu">
+                    <li>
+                        <input type="checkbox" name="capacidad_2" value="?capacidad=2">2 personas
+                    </li>
+                    <li>
+                        <input type="checkbox" name="capacidad_4" value="?capacidad=4">4 personas
+                    </li>
+                    <li>
+                        <input type="checkbox" name="capacidad_6" value="?capacidad=6">6 personas
+                    </li>
+                    <li>
+                        <input type="checkbox" name="capacidad_8" value="?capacidad=8">8 personas
+                    </li>
+                    <li>
+                        <input type="checkbox" name="capacidad_10" value="?capacidad=10">10 personas
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              <div class="card-body text-center">
+                <button type="submit" class="btn btn-primary">Filtrar</button>
+              </div>
+            </form>
+          </article> <!-- filter-group .// -->
+
+          <article class="filter-group">
+
+          </article> <!-- filter-group .// -->
+
+        </div> <!-- card.// -->
+
+      </aside> <!-- col.// -->
+      <main class="col-md-9">
+
+        <header class="border-bottom mb-4 pb-3">
+          <div class="form-inline">
+            <span class="mr-md-auto"><b>{{ product_count }}</b> Embarcaciones encontrados </span>
+
+          </div>
+        </header><!-- sect-heading -->
+
+        <div class="row">
+          {% if products %}
+          {% for product in products %}
+          <div class="col-md-4">
+              <figure class="card card-product-grid">
+                  <div class="img-wrap">
+                      <img src="{{ product.images.url }}">
+                      {% if not product.is_available or not product.stock or product.id in unavailable_products %}
+                      <div class="overlay">
+                          <span class="badge badge-danger">No disponible</span>
+                      </div>
+                      {% endif %}
+                  </div> <!-- img-wrap.// -->
+                  <figcaption class="info-wrap">
+                      <div class="fix-height">
+                          <a 
+                              {% if product.is_available and product.stock and not product.id in unavailable_products %}
+                              href="{{ product.get_url }}" 
+                              {% else %}
+                              class="text-muted disabled-link"
+                              {% endif %}
+                              class="title">{{ product.product_name }}</a>
+                          <div class="price-wrap mt-2">
+                              <span class="price">{{ product.price }}€/día</span>
+                          </div> <!-- price-wrap.// -->
+                      </div>
+                      <a 
+                          {% if product.is_available and product.stock and not product.id in unavailable_products %}
+                          href="{% url 'add_cart' product.id %}" class="btn btn-block btn-success"
+                          {% else %}
+                          class="btn btn-block btn-secondary disabled-link"
+                          {% endif %}
+                      >
+                          {% if product.is_available and product.stock and not product.id in unavailable_products %}Agregar al Carrito{% else %}No disponible{% endif %}
+                      </a>
+                  </figcaption>
+              </figure>
+          </div> <!-- col.// -->
+          {% endfor %}
+          {% else %}
+          <div class="col-12 text-center text-muted">
+              <h2>No se han encontrado resultados para tu búsqueda</h2>
+          </div>
+          {% endif %}
+      </div>
+      
+
+
+        <nav class="mt-4" aria-label="Page navigation sample">
+
+          {% if products.has_other_pages %}
+          <ul class="pagination">
+            {% if products.has_previous %}
+            <li class="page-item"><a class="page-link" href="?page={{ products.previous_page_number }}">Anterior</a></li>
+            {% else %}
+            <li class="page-item disabled"><a class="page-link" href="#">Anterior</a></li>
+            {% endif %}
+
+            {% for i in products.paginator.page_range %}
+              {% if products.number == i %}
+              <li class="page-item active"><a class="page-link" href="#">{{i}}</a></li>
+              {% else %}
+              <li class="page-item"><a class="page-link" href="?page={{i}}">{{i}}</a></li>
+              {% endif %}
+            {% endfor %}
+
+            {% if products.has_next %}
+              <li class="page-item"><a class="page-link" href="?page={{products.next_page_number}}">Siguiente</a></li>
+            {% else %}
+              <li class="page-item disabled"><a class="page-link" href="#">Siguiente</a></li>
+            {% endif %}
+          </ul>
+          {% endif %}
+
+        </nav>
+
+      </main> <!-- col.// -->
+
+    </div>
+
+  </div> <!-- container .//  -->
+</section>
+{% endblock %}

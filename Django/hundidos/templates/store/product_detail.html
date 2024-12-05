@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="section-content padding-y bg">
+  <div class="container">
+
+    <div class="card">
+      <div class="row no-gutters">
+        <aside class="col-md-6">
+          <article class="gallery-wrap">
+            <div class="img-big-wrap mainImage">
+              <center> <img src="{{ single_product.images.url }}"> </center>
+            </div>
+          </article>
+          <ul class="thumb">
+            <li>
+              <a href="{{ single_product.images.url }}" target="mainImage"><img src="{{ single_product.images.url }}" alt="Imagen del Producto"></a>
+            </li>
+          </ul>
+        </aside>
+        <main class="col-md-6 border-left">
+
+          <form action="{% url 'add_cart' single_product.id %}" method="POST">
+            {% csrf_token %}
+            <article class="content-body">
+
+              <h2 class="title">{{ single_product.product_name }}</h2>
+              <br>
+              <div class="mb-3">
+                <var class="price h4">Precio por día: {{ single_product.price }}€</var>
+              </div>
+
+              <p>{{ single_product.description }}</p>
+
+              <ul class="list-unstyled">
+                <li><strong>Puerto:</strong> {{ single_product.puerto }}</li>
+                <li><strong>Capacidad:</strong> {{ single_product.capacidad }} personas</li>
+                <li><strong>Fabricante:</strong> {{ single_product.fabricante }}</li>
+                <li><strong>Categoría:</strong> {{ single_product.category.category_name }}</li>
+              </ul>
+
+              <h5>Calendario de disponibilidad</h5>
+              <div id="calendar"></div> 
+
+              {% if single_product.stock <= 0 or not single_product.is_available %}
+              <h5>Lo lamentamos, este producto no está disponible</h5>
+              {% else %}
+              <button type="submit" class="btn btn-primary mt-3">Reservar</button>
+              {% endif %}
+
+            </article>
+          </form>
+        </main>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- FullCalendar -->
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var calendarEl = document.getElementById('calendar');
+
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+      initialView: 'dayGridMonth',
+      locale: 'es', // Cambia el idioma a español
+      events: {{ eventos_json|safe }} // Datos de los eventos desde el contexto
+    });
+
+    calendar.render();
+  });
+</script>
+
+{% endblock %}
+
+<!-- Agrega FullCalendar y configura las fechas -->
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const calendarEl = document.getElementById('calendar');
+    const calendar = new FullCalendar.Calendar(calendarEl, {
+      initialView: 'dayGridMonth',
+      locale: 'es',
+      selectable: true,
+      select: function (info) {
+        // Captura las fechas seleccionadas
+        document.getElementById('fecha_inicio').value = info.startStr;
+        document.getElementById('fecha_fin').value = info.endStr;
+      },
+      events: [
+        {% for fecha in fechas_ocupadas %}
+        {
+          title: 'Reservado',
+          start: '{{ fecha.start }}',
+          end: '{{ fecha.end }}',
+          color: 'red'
+        },
+        {% endfor %}
+      ],
+    });
+    calendar.render();
+  });
+</script>
+{% endblock %}
