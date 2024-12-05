@@ -21,6 +21,10 @@ def add_cart(request, product_id):
     product_variation = []
 
     if request.method == 'POST':
+        # Extraer la cantidad desde el formulario
+        quantity = int(request.POST.get('quantity', 1))  # Default es 1 si no se pasa
+
+        # Obtener las variaciones del producto si existen
         for item in request.POST:
             key = item
             value = request.POST[key]
@@ -48,21 +52,21 @@ def add_cart(request, product_id):
                 index = ex_var_list.index(product_variation)
                 item_id = id[index]
                 item = CartItem.objects.get(product=product, id=item_id)
-                if item.quantity < product.stock:
-                    item.quantity += 1
+                if item.quantity + quantity <= product.stock:  # Verifica si hay suficiente stock
+                    item.quantity += quantity
                     item.save()
                 else:
-                    messages.error(request, f'No hay más barcos disponibles de {item.product.product_name}.')
+                    messages.error(request, f'No hay más unidades disponibles de {item.product.product_name}.')
             else:
                 # Crear un nuevo artículo del carrito
-                item = CartItem.objects.create(product=product, quantity=1, user=current_user)
+                item = CartItem.objects.create(product=product, quantity=quantity, user=current_user)
                 if len(product_variation) > 0:
                     item.variation.clear()
                     item.variation.add(*product_variation)
                 item.save()
         else:
             # Crear un nuevo artículo del carrito
-            cart_item = CartItem.objects.create(product=product, quantity=1, user=current_user)
+            cart_item = CartItem.objects.create(product=product, quantity=quantity, user=current_user)
             if len(product_variation) > 0:
                 cart_item.variation.clear()
                 cart_item.variation.add(*product_variation)
@@ -72,9 +76,7 @@ def add_cart(request, product_id):
         try:
             cart = Cart.objects.get(cart_id=_cart_id(request))
         except Cart.DoesNotExist:
-            cart = Cart.objects.create(
-                cart_id=_cart_id(request)
-            )
+            cart = Cart.objects.create(cart_id=_cart_id(request))
         cart.save()
 
         is_cart_item_exists = CartItem.objects.filter(product=product, cart=cart).exists()
@@ -92,21 +94,21 @@ def add_cart(request, product_id):
                 index = ex_var_list.index(product_variation)
                 item_id = id[index]
                 item = CartItem.objects.get(product=product, id=item_id)
-                if item.quantity < product.stock:
-                    item.quantity += 1
+                if item.quantity + quantity <= product.stock:  # Verifica si hay suficiente stock
+                    item.quantity += quantity
                     item.save()
                 else:
-                    messages.error(request, f'No hay más barcos disponibles de {item.product.product_name}.')
+                    messages.error(request, f'No hay más unidades disponibles de {item.product.product_name}.')
             else:
                 # Crear un nuevo artículo del carrito
-                item = CartItem.objects.create(product=product, quantity=1, cart=cart)
+                item = CartItem.objects.create(product=product, quantity=quantity, cart=cart)
                 if len(product_variation) > 0:
                     item.variation.clear()
                     item.variation.add(*product_variation)
                 item.save()
         else:
             # Crear un nuevo artículo del carrito
-            cart_item = CartItem.objects.create(product=product, quantity=1, cart=cart)
+            cart_item = CartItem.objects.create(product=product, quantity=quantity, cart=cart)
             if len(product_variation) > 0:
                 cart_item.variation.clear()
                 cart_item.variation.add(*product_variation)

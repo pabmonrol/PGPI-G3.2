@@ -193,15 +193,28 @@
                               <span class="price">{{ product.price }}€/día</span>
                           </div> <!-- price-wrap.// -->
                       </div>
-                      <a 
-                          {% if product.is_available and product.stock %}
-                          href="{% url 'add_cart' product.id %}" class="btn btn-block btn-success"
-                          {% else %}
-                          class="btn btn-block btn-secondary disabled-link"
-                          {% endif %}
-                      >
-                          {% if product.is_available and product.stock %}Agregar al Carrito{% else %}No disponible{% endif %}
-                      </a>
+                      <!-- Formulario para agregar cantidad -->
+                      <form method="POST" action="{% url 'add_cart' product.id %}">
+                          {% csrf_token %}
+                          <div class="d-flex">
+                              <input 
+                                  type="number" 
+                                  name="quantity" 
+                                  class="form-control form-control-sm w-50 mr-2" 
+                                  min="1" 
+                                  max="{{ product.stock }}" 
+                                  value="1" 
+                                  {% if not product.is_available or not product.stock %}disabled{% endif %}
+                              >
+                              <button 
+                                  type="submit" 
+                                  class="btn btn-block btn-success btn-sm"
+                                  {% if not product.is_available or not product.stock %}disabled{% endif %}
+                              >
+                                  {% if product.is_available and product.stock %}Agregar al Carrito{% else %}No disponible{% endif %}
+                              </button>
+                          </div>
+                      </form>
                   </figcaption>
               </figure>
           </div> <!-- col.// -->
