@@ -1,6 +1,6 @@
 import datetime
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import Product, ReviewRating, ProductGallery
+from .models import Product, ReviewRating, ProductGallery, Fabricante, Puerto
 from category.models import Category
 from carts.models import CartItem
 from carts.views import _cart_id
@@ -10,85 +10,44 @@ from .forms import ReviewForm
 from django.contrib import messages
 from orders.models import OrderProduct, Order
 from datetime import timedelta
-from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required, user_passes_test
 from .forms import ProductForm
 from django.db.models import Sum
 
 
+from .models import Product, Fabricante, Puerto
+
 def store(request, category_slug=None):
     categories = Category.objects.all()
-    puertos = Product.objects.values_list('puerto', flat=True).distinct()
-    fabricantes = Product.objects.values_list('fabricante', flat=True).distinct()
+    puertos = Puerto.objects.all()
+    fabricantes = Fabricante.objects.all()
     products = Product.objects.all()
 
-    if category_slug:
-        categories = get_object_or_404(Category, slug=category_slug)
-        products = Product.objects.filter(category=categories).order_by('id')
-        paginator = Paginator(products, 6)
-        page = request.GET.get('page')
-        paged_products = paginator.get_page(page)
-        product_count = products.count()
-    else:
-        products = Product.objects.all().order_by('id')
-        paginator = Paginator(products, 6)
-        page = request.GET.get('page')
-        paged_products = paginator.get_page(page)
-        product_count = products.count()
-
-    # Filtrar por puerto
-    selected_puerto = request.GET.get('puerto')
-    if selected_puerto:
-        products = products.filter(puerto=selected_puerto)
-
-    #Filtrar por fabricante
-    selected_fabricante = request.GET.get('fabricante')
-    if selected_fabricante:
-        products = products.filter(fabricante=selected_fabricante)
-
-    # Filtrar por rango de precios
+    # Filtros desde el formulario
+    selected_category = request.GET.getlist('category')
+    selected_puerto = request.GET.getlist('puerto')
+    selected_fabricante = request.GET.getlist('fabricante')
     min_price = request.GET.get('min_price')
     max_price = request.GET.get('max_price')
+    capacidad = request.GET.getlist('capacidad')
+
+    # Aplicar los filtros si están seleccionados
+    if selected_category:
+        products = products.filter(category__nombre__in=selected_category)
+
+    if selected_puerto:
+        products = products.filter(puerto__nombre__in=selected_puerto)
+
+    if selected_fabricante:
+        products = products.filter(fabricante__nombre__in=selected_fabricante)
+
     if min_price and max_price:
         products = products.filter(price__gte=min_price, price__lte=max_price)
 
-    # Filtrar por capacidad
-    selected_capacity = request.GET.get('capacidad')
-    if selected_capacity:
-        products = products.filter(capacidad__gte=selected_capacity)
+    if capacidad:
+        products = products.filter(capacidad__in=capacidad)
 
-    # Filtrar por categoría
-    category_slug = request.GET.get('category')
-    if category_slug:
-        category = Category.objects.get(slug=category_slug)
-        products = products.filter(category=category)
-
-    unavailable_products = []
-    # Filtrar por fecha
-    start_date = request.GET.get('start_date')
-    end_date = request.GET.get('end_date')
-    if start_date and end_date:
-        try:
-            start_date = datetime.datetime.strptime(start_date, '%Y-%m-%d')
-            end_date = datetime.datetime.strptime(end_date, '%Y-%m-%d')
-            
-            # Obtener los productos reservados en el rango de fechas
-            reserved_products = OrderProduct.objects.filter(
-                Q(fecha_inicio__lte=end_date) & Q(fecha_fin__gte=start_date)
-            ).values('product_id').annotate(total_reserved=Sum('quantity'))
-
-            for reserved in reserved_products:
-                product_id = reserved['product_id']  # Accede al ID del producto
-                total_reserved = reserved['total_reserved']  # Cantidad total reservada
-
-                product = Product.objects.get(id=product_id)
-                if total_reserved >= product.stock:
-                    unavailable_products.append(product.id)
-        except ValueError:
-            # Manejo de errores por formato incorrecto de fecha
-            pass
-
-
+    # Paginación
     paginator = Paginator(products, 6)
     page = request.GET.get('page')
     paged_products = paginator.get_page(page)
@@ -100,10 +59,10 @@ def store(request, category_slug=None):
         'product_count': product_count,
         'puertos': puertos,
         'fabricantes': fabricantes,
+        'selected_category': selected_category,
+        'selected_puerto': selected_puerto,
+        'selected_fabricante': selected_fabricante,
         'request': request,
-        'start_date': start_date,
-        'end_date': end_date,
-        'unavailable_products': unavailable_products,
     }
 
     return render(request, 'store/store.html', context)

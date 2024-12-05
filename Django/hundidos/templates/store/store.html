@@ -54,9 +54,14 @@
               <div class="card-body">
 
                 <ul class="list-menu">
+
                   <li><a href="{% url 'store' %}">Mostrar Todos</a></li>
                   {% for category in links %}
-                  <li><a href="{{ category.get_url }}">{{ category.category_name}}</a></li>
+                  <li>
+                    <input type="checkbox" name="categoria" value="{{ category.category_name }}" 
+                    {% if category.category_name in selected_category %}checked{% endif %}>
+                    {{ category.category_name}}
+                  </li>
                   {% endfor %}
                 </ul>
 
@@ -76,8 +81,12 @@
                 <div class="card-body">
                   <ul class="list-menu">
                     {% for puerto in puertos %}
-                    <li><a href="?puerto={{ puerto }}">{{ puerto }}</a></li>
-                    {% endfor %}
+                    <li>
+                      <input type="checkbox" name="puerto" value="{{ puerto.nombre }}" 
+                        {% if puerto.nombre in selected_puerto %}checked{% endif %}>
+                      {{ puerto.nombre }}
+                      {% endfor %}
+                    </li>
                   </ul>
                 </div>
         
@@ -94,9 +103,11 @@
                   <ul class="list-menu">
                     {% for fabricante in fabricantes %}
                     <li>
-                        <a href="?fabricante={{ fabricante }}">{{ fabricante }}</a>
+                      <input type="checkbox" name="fabricante" value="{{ fabricante.nombre }}" 
+                        {% if fabricante.nombre in selected_fabricante %}checked{% endif %}>
+                      {{ fabricante.nombre }}
+                      {% endfor %}
                     </li>
-                    {% endfor %}
                   </ul>
                 </div>
               </div>
@@ -152,19 +163,19 @@
                 <div class="card-body">
                   <ul class="list-menu">
                     <li>
-                        <a href="?capacidad=2" class="text-dark">2 personas</a>
+                        <input type="checkbox" name="capacidad_2" value="?capacidad=2">2 personas
                     </li>
                     <li>
-                        <a href="?capacidad=4" class="text-dark">4 personas</a>
+                        <input type="checkbox" name="capacidad_4" value="?capacidad=4">4 personas
                     </li>
                     <li>
-                        <a href="?capacidad=6" class="text-dark">6 personas</a>
+                        <input type="checkbox" name="capacidad_6" value="?capacidad=6">6 personas
                     </li>
                     <li>
-                        <a href="?capacidad=8" class="text-dark">8 personas</a>
+                        <input type="checkbox" name="capacidad_8" value="?capacidad=8">8 personas
                     </li>
                     <li>
-                        <a href="?capacidad=10" class="text-dark">10 personas</a>
+                        <input type="checkbox" name="capacidad_10" value="?capacidad=10">10 personas
                     </li>
                   </ul>
                 </div>

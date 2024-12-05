@@ -6,6 +6,20 @@ from django.db.models import Avg, Count
 
 
 # Create your models here.
+class Puerto(models.Model):
+    nombre = models.CharField(max_length=100, unique=True)
+    class Meta:
+        verbose_name = "Puerto"
+        verbose_name_plural = "Puertos"
+    def __str__(self):
+        return self.nombre
+class Fabricante(models.Model):
+    nombre = models.CharField(max_length=100, unique=True)
+    class Meta:
+        verbose_name = "Fabricante"
+        verbose_name_plural = "Fabricantes"
+    def __str__(self):
+        return self.nombre
 class Product(models.Model):
     product_name = models.CharField(max_length=200, unique=True)
     slug = models.CharField(max_length=200, unique=True)
@@ -17,8 +31,8 @@ class Product(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     created_date = models.DateTimeField(auto_now_add=True)
     modified_date = models.DateTimeField(auto_now=True)
-    fabricante = models.CharField(max_length=100)
-    puerto = models.CharField(max_length=100)
+    fabricante = models.ForeignKey(Fabricante, on_delete=models.CASCADE)
+    puerto = models.ForeignKey(Puerto, on_delete=models.CASCADE)
     capacidad = models.IntegerField(default=4)
 
     def save(self, *args, **kwargs):
