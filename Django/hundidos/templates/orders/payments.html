@@ -79,30 +79,39 @@
           <div class="card-body">
             <dl class="dlist-align">
               <dt>Precio Total:</dt>
-              <dd class="text-right">{{ total }}€</dd>
+              <dd class="text-right text-muted">{{ total }}€</dd>
             </dl>
             <dl class="dlist-align">
-              <dt>Tasa combustible:</dt>
-              <dd class="text-right"> {{ extra_combustible }}€</dd>
+              <dt>Tasa combustible:
+                  <i class="fa fa-info-circle tooltip-icon" style="color: yellowgreen;" data-toggle="tooltip" title="La tasa de combustible puede variar según la embarcación y la duración del alquiler."></i>
+              </dt>
+              <dd class="text-right text-muted">{{ extra_combustible }}€</dd>
             </dl>
             <dl class="dlist-align">
-              <dt>Impuesto IVA (21%):</dt>
-              <dd class="text-right"> {{ tax }}€</dd>
+              <dt>
+                  IVA (21%):
+                  <i class="fa fa-info-circle tooltip-icon" style="color: yellowgreen;" data-toggle="tooltip" title="Impuesto del 21% sobre el precio base."></i>
+              </dt>                                                        
+              <dd class="text-right text-muted">{{ tax }}€</dd>
             </dl>
             <dl class="dlist-align">
               <dt>Total:</dt>
-              <dd class="text-right text-dark b"><strong>{{ grand_total }}€</strong></dd>
-            </dl>                
-            <dl class="dlist-align">
-              <dt class="text-right text-dark b"><strong>ATENCIÓN:</strong></dt>
-              <dd class="text-right text-dark b"><strong>En caso que desee cancelar la reserva no se devolverá el importe</strong></dd>
-            </dl>
+              <dd class="text-right"><strong>{{ grand_total }}€</strong></dd>
+            </dl>               
+            <div class="alert-info mt-3">
+              <p class="text-center" style="font-size: 0.85rem; color: #ff4500;">
+                  <strong>ATENCIÓN:</strong> En caso que desee cancelar la reserva no se devolverá el importe.
+              </p>
+          </div>
+          
             <hr>
             <p class="text-center mb-3">
               <img src="{% static './images/misc/payments.png' %}" height="26">
             </p>
             <div id="paypal-button-container"></div>
-            <a href="{% url 'mark_pending' order.id %}" class="btn btn-light btn-block">Pagar al momento de entrega</a>
+            <hr>
+            <p class="text-center text-muted">ó selecciona otra opción:</p>
+            <a href="{% url 'mark_pending' order.id %}" class="btn btn-success btn-block"><i class="fa fa-check-circle" aria-hidden="true"></i> Reservar y pagar al momento de entrega</a>
           </div> <!-- card-body.// -->
         </div> <!-- card.// -->
       </aside> <!-- col.// -->
