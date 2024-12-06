@@ -17,6 +17,7 @@
 
 <!-- ========================= SECTION  ========================= -->
 <section class="section-name padding-y-sm">
+{% if user.id is None or not user.is_admin %}
 <div class="container">
 
 <header class="section-heading">
@@ -47,9 +48,9 @@
 		</div>
 	</div> <!-- col.// -->
 	{% endfor %}
-
 </div>
 </div><!-- container // -->
+{% endif %}
 </section>
 <!-- ========================= SECTION  END// ========================= -->
 

@@ -92,11 +92,12 @@
 
           {% endif%}
 
-
+          {% if user.id is None or not user.is_admin %}
           <a href="{% url 'cart' %}" class="widget-header pl-3 ml-3">
             <div class="icon icon-sm rounded-circle border"><i class="fa fa-shopping-cart"></i></div>
             <span class="badge badge-pill badge-danger notify">{{ cart_count }}</span>
           </a>
+          {% endif %}
         </div> <!-- widgets-wrap.// -->
       </div> <!-- col.// -->
 </div> <!-- row.// -->

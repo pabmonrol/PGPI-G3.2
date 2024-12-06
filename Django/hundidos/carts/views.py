@@ -6,6 +6,7 @@ from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.contrib.auth.decorators import login_required
 from datetime import datetime, date, timedelta
 from django.contrib import messages
+from django.contrib.auth.decorators import user_passes_test
 
 # Create your views here.
 def _cart_id(request):
@@ -150,7 +151,7 @@ def remove_cart_item(request, product_id, cart_item_id):
     cart_item.delete()
     return redirect('cart')
 
-
+@user_passes_test(lambda u:  u.id is None or not u.is_admin)
 def cart(request, total=0, duracion=0, cart_items=None):
     tax = 0
     grand_total = 0
