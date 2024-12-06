@@ -45,7 +45,39 @@ def store(request, category_slug=None):
         products = products.filter(price__gte=min_price, price__lte=max_price)
 
     if capacidad:
-        products = products.filter(capacidad__in=capacidad)
+        products = products.filter(capacidad__gte=capacidad)
+
+    unavailable_products = []
+    # Filtrar por fecha
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+    if start_date and end_date:
+        # Validar que la fecha de inicio sea posterior al día de hoy
+        if datetime.datetime.strptime(start_date, '%Y-%m-%d').date() <= datetime.date.today():
+            messages.error(request, 'La fecha de inicio debe ser posterior al día de hoy.')
+        
+        # Validar que la fecha de inicio sea anterior a la fecha de fin
+        if datetime.datetime.strptime(start_date, '%Y-%m-%d') >= datetime.datetime.strptime(end_date, '%Y-%m-%d'):
+            messages.error(request, 'La fecha de inicio debe ser anterior a la fecha de fin.')
+        try:
+            start_date = datetime.datetime.strptime(start_date, '%Y-%m-%d')
+            end_date = datetime.datetime.strptime(end_date, '%Y-%m-%d')
+            
+            # Obtener los productos reservados en el rango de fechas
+            reserved_products = OrderProduct.objects.filter(
+                Q(fecha_inicio__lte=end_date) & Q(fecha_fin__gte=start_date)
+            ).values('product_id').annotate(total_reserved=Sum('quantity'))
+
+            for reserved in reserved_products:
+                product_id = reserved['product_id']  # Accede al ID del producto
+                total_reserved = reserved['total_reserved']  # Cantidad total reservada
+
+                product = Product.objects.get(id=product_id)
+                if total_reserved >= product.stock:
+                    unavailable_products.append(product.id)
+        except ValueError:
+            # Manejo de errores por formato incorrecto de fecha
+            pass
 
     # Paginación
     paginator = Paginator(products, 6)
@@ -63,6 +95,10 @@ def store(request, category_slug=None):
         'selected_puerto': selected_puerto,
         'selected_fabricante': selected_fabricante,
         'request': request,
+        'start_date': start_date,
+        'end_date': end_date,
+        'unavailable_products': unavailable_products,
+        'capacidad': capacidad,
     }
 
     return render(request, 'store/store.html', context)

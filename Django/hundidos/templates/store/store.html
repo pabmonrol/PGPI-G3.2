@@ -6,12 +6,20 @@
   <div class="container">
     <h2 class="title-page">Nuestras embarcaciones</h2>
 
+
   </div> <!-- container //  -->
 </section>
 
 
 
 <section class="section-content padding-y">
+  {% if messages %}
+  <div class="alert alert-danger text-center mx-auto" style="max-width: 600px;">
+      {% for message in messages %}
+          <p>{{ message }}</p>
+      {% endfor %}
+  </div>
+  {% endif %}
   <div class="container">
 
     <div class="row">
@@ -80,7 +88,6 @@
                 <div class="filter-content collapse show" id="collapse_1" style="">
                   <div class="card-body">
                     <ul class="list-menu">
-                      <li><a href="{% url 'store' %}">Mostrar Todos</a></li>
                       {% for category in links %}
                       <li>
                         <label class="checkbox-btn">
@@ -164,29 +171,53 @@
                 </a>
               </header>
               <div class="filter-content collapse show" id="collapse_6" style="">
-                <div class="card-body">
-                  <ul class="list-menu">
-                    <li>
-                        <input type="checkbox" name="capacidad" value="2">2 personas
-                    </li>
-                    <li>
-                        <input type="checkbox" name="capacidad" value="4">4 personas
-                    </li>
-                    <li>
-                        <input type="checkbox" name="capacidad" value="6">6 personas
-                    </li>
-                    <li>
-                        <input type="checkbox" name="capacidad" value="8">8 personas
-                    </li>
-                    <li>
-                        <input type="checkbox" name="capacidad" value="10">10 personas
-                    </li>
-                  </ul>
+                <div class="filter-content collapse show" id="collapse_6" style="">
+                  <div class="card-body">
+                    <ul class="list-menu">
+                      <li>
+                        <label>
+                          <input type="radio" name="capacidad" value="2" 
+                            {% if capacidad == '2' %}checked{% endif %}>
+                          2 personas
+                        </label>
+                      </li>
+                      <li>
+                        <label>
+                          <input type="radio" name="capacidad" value="4" 
+                            {% if capacidad == '4' %}checked{% endif %}>
+                          4 personas
+                        </label>
+                      </li>
+                      <li>
+                        <label>
+                          <input type="radio" name="capacidad" value="6" 
+                            {% if capacidad == '6' %}checked{% endif %}>
+                          6 personas
+                        </label>
+                      </li>
+                      <li>
+                        <label>
+                          <input type="radio" name="capacidad" value="8" 
+                            {% if capacidad == '8' %}checked{% endif %}>
+                          8 personas
+                        </label>
+                      </li>
+                      <li>
+                        <label>
+                          <input type="radio" name="capacidad" value="10" 
+                            {% if capacidad == '10' %}checked{% endif %}>
+                          10 personas
+                        </label>
+                      </li>
+                    </ul>
+                  </div>
                 </div>
+                
               </div>
 
               <div class="card-body text-center">
                 <button type="submit" class="btn btn-primary">Filtrar</button>
+                <a href="{% url 'store' %}" class="btn btn-secondary">Limpiar filtros</a>
               </div>
             </form>
           </article> <!-- filter-group .// -->
