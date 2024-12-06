@@ -59,10 +59,12 @@
                   <ul class="list-menu">
                     {% for puerto in puertos %}
                     <li>
-                      <input type="checkbox" name="puerto" value="{{ puerto.nombre }}" 
-                        {% if puerto.nombre in selected_puerto %}checked{% endif %}>
-                      {{ puerto.nombre }}
-                      {% endfor %}
+                      <label class="checkbox-btn">
+                        <input type="checkbox" name="puerto" value="{{ puerto.nombre }}" 
+                          {% if puerto.nombre in selected_puerto %}checked{% endif %}>
+                          <span class="btn btn-light">{{ puerto.nombre }}</span>
+                        {% endfor %}
+                      </label>
                     </li>
                   </ul>
                 </div>
@@ -81,9 +83,11 @@
                       <li><a href="{% url 'store' %}">Mostrar Todos</a></li>
                       {% for category in links %}
                       <li>
-                        <input type="checkbox" name="categoria" value="{{ category.slug }}" 
-                        {% if category.slug in selected_category %}checked{% endif %}>
-                        {{ category.category_name}}
+                        <label class="checkbox-btn">
+                          <input type="checkbox" name="categoria" value="{{ category.slug }}" 
+                          {% if category.slug in selected_category %}checked{% endif %}>
+                          <span class="btn btn-light">{{ category.category_name}}</span>
+                        </label>
                       </li>
                       {% endfor %}
                     </ul>
@@ -101,10 +105,12 @@
                   <ul class="list-menu">
                     {% for fabricante in fabricantes %}
                     <li>
-                      <input type="checkbox" name="fabricante" value="{{ fabricante.nombre }}" 
-                        {% if fabricante.nombre in selected_fabricante %}checked{% endif %}>
-                      {{ fabricante.nombre }}
-                      {% endfor %}
+                      <label class="checkbox-btn">
+                        <input type="checkbox" name="fabricante" value="{{ fabricante.nombre }}" 
+                          {% if fabricante.nombre in selected_fabricante %}checked{% endif %}>
+                        <span class="btn btn-light">{{ fabricante.nombre }} </span>
+                        {% endfor %}
+                      </label>
                     </li>
                   </ul>
                 </div>
