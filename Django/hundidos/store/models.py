@@ -5,6 +5,27 @@ from accounts.models import Account
 from django.db.models import Avg, Count
 
 
+class Puerto(models.Model):
+    nombre = models.CharField(max_length=100, unique=True)
+
+    class Meta:
+        verbose_name = "Puerto"
+        verbose_name_plural = "Puertos"
+
+    def __str__(self):
+        return self.nombre
+
+
+class Fabricante(models.Model):
+    nombre = models.CharField(max_length=100, unique=True)
+
+    class Meta:
+        verbose_name = "Fabricante"
+        verbose_name_plural = "Fabricantes"
+
+    def __str__(self):
+        return self.nombre
+
 # Create your models here.
 class Puerto(models.Model):
     nombre = models.CharField(max_length=100, unique=True)

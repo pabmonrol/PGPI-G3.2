@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
-
+{% if user.id is None or not user.is_admin %}
 <section class="section-pagetop bg">
   <div class="container">
     <h2 class="title-page">Nuestras embarcaciones</h2>
@@ -229,6 +229,7 @@
         </div> <!-- card.// -->
 
       </aside> <!-- col.// -->
+      
       <main class="col-md-9">
 
         <header class="border-bottom mb-4 pb-3">
@@ -264,15 +265,28 @@
                               <span class="price">{{ product.price }}€/día</span>
                           </div> <!-- price-wrap.// -->
                       </div>
-                      <a 
-                          {% if product.is_available and product.stock and not product.id in unavailable_products %}
-                          href="{% url 'add_cart' product.id %}" class="btn btn-block btn-success"
-                          {% else %}
-                          class="btn btn-block btn-secondary disabled-link"
-                          {% endif %}
-                      >
-                          {% if product.is_available and product.stock and not product.id in unavailable_products %}Agregar al Carrito{% else %}No disponible{% endif %}
-                      </a>
+                      <!-- Formulario para agregar cantidad -->
+                      <form method="POST" action="{% url 'add_cart' product.id %}">
+                          {% csrf_token %}
+                          <div class="d-flex">
+                              <input 
+                                  type="number" 
+                                  name="quantity" 
+                                  class="form-control form-control-sm w-50 mr-2" 
+                                  min="1" 
+                                  max="{{ product.stock }}" 
+                                  value="1" 
+                                  {% if not product.is_available or not product.stock and not product.id in unavailable_products %}disabled{% endif %}
+                              >
+                              <button 
+                                  type="submit" 
+                                  class="btn btn-block btn-success btn-sm"
+                                  {% if not product.is_available or not product.stock and not product.id in unavailable_products %}disabled{% endif %}
+                              >
+                                  {% if product.is_available and product.stock and not product.id in unavailable_products %}Agregar al Carrito{% else %}No disponible{% endif %}
+                              </button>
+                          </div>
+                      </form>
                   </figcaption>
               </figure>
           </div> <!-- col.// -->
@@ -315,7 +329,7 @@
         </nav>
 
       </main> <!-- col.// -->
-
+      {% endif %}
     </div>
 
   </div> <!-- container .//  -->
