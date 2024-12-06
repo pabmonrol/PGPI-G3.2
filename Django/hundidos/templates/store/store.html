@@ -43,33 +43,10 @@
               </div>
 
 
-          <article class="filter-group">
-            <header class="card-header">
-              <a href="#" data-toggle="collapse" data-target="#collapse_1" aria-expanded="true" class="">
-                <i class="icon-control fa fa-chevron-down"></i>
-                <h6 class="title">Categorias</h6>
-              </a>
-            </header>
-            <div class="filter-content collapse show" id="collapse_1" style="">
-              <div class="card-body">
-
-                <ul class="list-menu">
-
-                  <li><a href="{% url 'store' %}">Mostrar Todos</a></li>
-                  {% for category in links %}
-                  <li>
-                    <input type="checkbox" name="categoria" value="{{ category.category_name }}" 
-                    {% if category.category_name in selected_category %}checked{% endif %}>
-                    {{ category.category_name}}
-                  </li>
-                  {% endfor %}
-                </ul>
-
-              </div> <!-- card-body.// -->
-            </div>
-          </article> <!-- filter-group  .// -->
 
           <article class="filter-group">
+
+
             <header class="card-header">
               <a href="#" data-toggle="collapse" data-target="#collapse_4" aria-expanded="true" class="">
                 <i class="icon-control fa fa-chevron-down"></i>
@@ -91,6 +68,27 @@
                 </div>
         
               </div>
+
+              <header class="card-header">
+                <a href="#" data-toggle="collapse" data-target="#collapse_1" aria-expanded="true" class="">
+                  <i class="icon-control fa fa-chevron-down"></i>
+                  <h6 class="title">Categorias</h6>
+                </a>
+              </header>
+                <div class="filter-content collapse show" id="collapse_1" style="">
+                  <div class="card-body">
+                    <ul class="list-menu">
+                      <li><a href="{% url 'store' %}">Mostrar Todos</a></li>
+                      {% for category in links %}
+                      <li>
+                        <input type="checkbox" name="categoria" value="{{ category.slug }}" 
+                        {% if category.slug in selected_category %}checked{% endif %}>
+                        {{ category.category_name}}
+                      </li>
+                      {% endfor %}
+                    </ul>
+                  </div> <!-- card-body.// -->
+                </div>
 
               <header class="card-header">
                 <a href="#" data-toggle="collapse" data-target="#collapse_5" aria-expanded="true" class="">
@@ -163,19 +161,19 @@
                 <div class="card-body">
                   <ul class="list-menu">
                     <li>
-                        <input type="checkbox" name="capacidad_2" value="?capacidad=2">2 personas
+                        <input type="checkbox" name="capacidad" value="2">2 personas
                     </li>
                     <li>
-                        <input type="checkbox" name="capacidad_4" value="?capacidad=4">4 personas
+                        <input type="checkbox" name="capacidad" value="4">4 personas
                     </li>
                     <li>
-                        <input type="checkbox" name="capacidad_6" value="?capacidad=6">6 personas
+                        <input type="checkbox" name="capacidad" value="6">6 personas
                     </li>
                     <li>
-                        <input type="checkbox" name="capacidad_8" value="?capacidad=8">8 personas
+                        <input type="checkbox" name="capacidad" value="8">8 personas
                     </li>
                     <li>
-                        <input type="checkbox" name="capacidad_10" value="?capacidad=10">10 personas
+                        <input type="checkbox" name="capacidad" value="10">10 personas
                     </li>
                   </ul>
                 </div>

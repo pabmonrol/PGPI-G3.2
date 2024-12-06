@@ -24,16 +24,16 @@ def store(request, category_slug=None):
     products = Product.objects.all()
 
     # Filtros desde el formulario
-    selected_category = request.GET.getlist('category')
+    selected_category = request.GET.getlist('categoria')
     selected_puerto = request.GET.getlist('puerto')
     selected_fabricante = request.GET.getlist('fabricante')
     min_price = request.GET.get('min_price')
     max_price = request.GET.get('max_price')
-    capacidad = request.GET.getlist('capacidad')
+    capacidad = request.GET.get('capacidad')
 
     # Aplicar los filtros si están seleccionados
     if selected_category:
-        products = products.filter(category__nombre__in=selected_category)
+        products = products.filter(category__slug__in=selected_category)
 
     if selected_puerto:
         products = products.filter(puerto__nombre__in=selected_puerto)
