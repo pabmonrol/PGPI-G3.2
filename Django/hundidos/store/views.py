@@ -1,6 +1,6 @@
 import datetime
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import Product, ReviewRating, ProductGallery, Fabricante, Puerto
+from .models import Product, ReviewRating, Fabricante, Puerto
 from category.models import Category
 from carts.models import CartItem
 from carts.views import _cart_id
