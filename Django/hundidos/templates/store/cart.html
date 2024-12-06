@@ -4,158 +4,162 @@
 {% block content %}
 <section class="section-content padding-y bg">
     <div class="container">
-
-    <!-- ============================ COMPONENT 1 ================================= -->
-    {% if not cart_items %}
-      <h3 class="text-center">¡Parece que no has agregado nada aún!</h3>
-      <br>
-      <div class="text-center">
-        <a href="{% url 'store' %}" class="btn btn-primary">Ir al catálogo</a>
-      </div>
-    {% else %}
-    <div class="row">
-        <aside class="col-lg-9">
-    <div class="card">
-    <table class="table table-borderless table-shopping-cart">
-    <thead class="text-muted">
-    <tr class="small text-uppercase">
-      <th scope="col" width="120">Embarcación(es)</th>
-      <th scope="col" width="120">Cantidad</th>
-      <th scope="col" width="120">Fechas</th>
-      <th scope="col" width="120">Precio</th>
-      <th scope="col" class="text-right" width="200"> </th>
-    </tr>
-    </thead>
-    <tbody>
-
-    {% if messages %}
-        <div class="alert alert-danger">
-            {% for message in messages %}
-                <p>{{ message }}</p>
-            {% endfor %}
-        </div>
-    {% endif %}
-
-    {% for cart_item in cart_items %}
-    <tr>
-        <td>
-            <figure class="itemside align-items-center">
-                <div class="aside"><img src="{{ cart_item.product.images.url }}" class="img-sm"></div>
-                <figcaption class="info">
-                    <a href="{{ cart_item.product.get_url }}" class="title text-dark">{{ cart_item.product.product_name }}</a>
-
-                    <p class="text-muted small">
-                      {% if cart_item.variation.all %}
-                        {% for item in cart_item.variation.all %}
-                          {{ item.variation_category | capfirst }} : {{ item.variation_value | capfirst }} <br>
-                        {% endfor %}
-                      {% endif %}
-                    </p>
-                </figcaption>
-            </figure>
-        </td>
-        <td>
-            <!-- col.// -->
-            <div class="col">
-                <div class="input-group input-spinner">
-                    <div class="input-group-prepend">
-
-                    <a href="{% url 'remove_cart' cart_item.product.id cart_item.id %}" class="btn btn-light" type="button" id="button-plus"> <i class="fa fa-minus"></i> </a>
+        <!-- ============================ COMPONENT 1 ================================= -->
+         {% if not cart_items %}
+         <h3 class="text-center">¡Parece que no has agregado nada aún!</h3>
+        <br>
+        <div class="text-center"><a href="{% url 'store' %}" class="btn btn-primary">Ir al catálogo</a></div>
+        {% else %}
+        <div class="row">
+            <aside class="col-lg-9">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title mb-4">Paso 1: Revisa tu Carrito</h4>
+                        <p class="text-muted">Por favor, revisa los productos en tu carrito antes de proceder al pago.</p> 
+                        <hr>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr class="text-uppercase text-muted">
+                                        <th scope="col" width="20%" class="text-center">Embarcación</th>
+                                        <th scope="col" width="30%" class="text-center">Fechas</th>
+                                        <th scope="col" width="20%" class="text-center">Cantidad</th>
+                                        <th scope="col" width="20%" class="text-center">Precio</th>
+                                        <th scope="col" width="10%" class="text-center">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% if messages %}
+                                    <tr>
+                                        <td colspan="5">
+                                            <div class="alert alert-danger">
+                                                {% for message in messages %}
+                                                <p class="mb-0">{{ message }}</p>
+                                                {% endfor %}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endif %}
+                        
+                                    {% for cart_item in cart_items %}
+                                    <tr>
+                                        <!-- Columna de Embarcación -->
+                                        <td>
+                                            <figure class="itemside align-items-center d-flex flex-column flex-md-row">
+                                                <div class="aside">
+                                                    <img src="{{ cart_item.product.images.url }}" class="img-fluid rounded" style="max-width: 80px;">
+                                                </div>
+                                                <figcaption class="info ps-md-3 mt-2 mt-md-0 text-center text-md-start">
+                                                    <a href="{{ cart_item.product.get_url }}" class="fw-bold text-dark d-block text-truncate" style="max-width: 150px;">
+                                                       
+                                                    </a>
+                                                    <br> {{ cart_item.product.product_name }}
+                                                    <p class="text-muted small mb-0">
+                                                        {% if cart_item.variation.all %}
+                                                        {% for item in cart_item.variation.all %}
+                                                        {{ item.variation_category | capfirst }}: {{ item.variation_value | capfirst }}<br>
+                                                        {% endfor %}
+                                                        {% endif %}
+                                                    </p>
+                                                </figcaption>
+                                            </figure>
+                                        </td>
+                                        <!-- Columna de Fechas -->
+                                        <td>
+                                            <form action="{% url 'update_cart' %}" method="post">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="item_ids" value="{{ cart_item.id }}">
+                                                {% for item in cart_item.variation.all %}
+                                                <input type="hidden" name="{{ item.variation_category | lower }}" value="{{ item.variation_value | capfirst }}">
+                                                {% endfor %}
+                                                <div class="d-flex flex-wrap gap-2">
+                                                    <div class="input-group input-group-sm">
+                                                        <span style="display: inline-block; width: 70px; text-align: left;">Inicio:</span>
+                                                        <input type="date" name="start_date_{{ cart_item.id }}" value="{{ cart_item.fecha_inicio|date:'Y-m-d' }}" class="form-control" required>
+                                                    </div>
+                                                    <div class="input-group input-group-sm">
+                                                        <span style="display: inline-block; width: 70px; text-align: left;">Fin:</span>
+                                                        <input type="date" name="end_date_{{ cart_item.id }}" value="{{ cart_item.fecha_fin|date:'Y-m-d' }}" class="form-control" required>
+                                                    </div>
+                                                </div>
+                                                <button class="btn btn-primary btn-sm mt-2 w-100" type="submit">Actualizar</button>
+                                            </form>
+                                        </td>
+                                        <!-- Columna de Cantidad -->
+                                        <td>
+                                            <div class="input-group input-spinner">
+                                                <div class="input-group-prepend">
+                                                <a href="{% url 'remove_cart' cart_item.product.id cart_item.id %}" class="btn btn-light" type="button" id="button-plus"> <i class="fa fa-minus"></i> </a>
+                                                </div>
+                                                <input type="text" class="form-control"  value="{{ cart_item.quantity }}">
+                                                <div class="input-group-append">
+                                                    <form action="{% url 'add_cart' cart_item.product.id %}" method="post">
+                                                    {% csrf_token %}
+                                                    {% for item in cart_item.variation.all %}
+                                                        <input type="hidden" name="{{ item.variation_category | lower }}" value="{{ item.variation_value | capfirst }}">
+                                                    {% endfor %}
+                                                    <button class="btn btn-light" type="submit" id="button-minus"> <i class="fa fa-plus"></i> </button>
+                                                    </form>
+                                                </div>
+                                            </div> <!-- input-group.// -->
+                                        </td>
+                                        <!-- Columna de Precio -->
+                                        <td>
+                                            <div class="text-truncate">
+                                                <span class="fw-bold">€{{ cart_item.sub_total }}</span>
+                                                <p class="text-muted small mb-0">{{ cart_item.product.price }}€/día</p>
+                                            </div>
+                                        </td>
+                                        <!-- Columna de Acciones -->
+                                        <td class="text-center">
+                                            <a href="{% url 'remove_cart_item' cart_item.product.id cart_item.id %}" class="btn btn-danger btn-sm">Eliminar</a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-                    <input type="text" class="form-control"  value="{{ cart_item.quantity }}">
-                    <div class="input-group-append">
-
-                        <form action="{% url 'add_cart' cart_item.product.id %}" method="post">
-                        {% csrf_token %}
-                        {% for item in cart_item.variation.all %}
-                            <input type="hidden" name="{{ item.variation_category | lower }}" value="{{ item.variation_value | capfirst }}">
-                        {% endfor %}
-                        <button class="btn btn-light" type="submit" id="button-minus"> <i class="fa fa-plus"></i> </button>
-
-                        </form>
-
-                    </div>
-                </div> <!-- input-group.// -->
-            </div> <!-- col.// -->
-        </td>
-        <td>
-            <div class="col">
-                <div class="input-group input-spinner">
-                    <form action="{% url 'update_cart' %}" method="post" style="width: 100%;">
-                        {% csrf_token %}
-                        <input type="hidden" name="item_ids" value="{{ cart_item.id }}">
-                        {% for item in cart_item.variation.all %}
-                            <input type="hidden" name="{{ item.variation_category | lower }}" value="{{ item.variation_value | capfirst }}">
-                        {% endfor %}
-                        <div class="form-group">
-                            <label for="start_date_{{ cart_item.id }}">Fecha de Inicio:</label>
-                            <input type="date" name="start_date_{{ cart_item.id }}" id="start_date_{{ cart_item.id }}" value="{{ cart_item.fecha_inicio|date:'Y-m-d' }}" required onchange="updatePrice({{ cart_item.id }})">
-                        </div>
-                        <div class="form-group">
-                            <label for="end_date_{{ cart_item.id }}">Fecha de Fin:</label>
-                            <input type="date" name="end_date_{{ cart_item.id }}" id="end_date_{{ cart_item.id }}" value="{{ cart_item.fecha_fin|date:'Y-m-d' }}" required onchange="updatePrice({{ cart_item.id }})">
-                        </div>
-                        <div class="form-group">
-                            <button class="btn btn-primary btn-block" type="submit" id="button-update" style="width: 200px;">Actualizar Fechas</button>
-                        </div>
-                    </form>
-                </div>
-            </div> <!-- input-group.// -->
-        </td>
-        <td>
-            <div class="price-wrap">
-                <var class="price" id="price_{{ cart_item.id }}" data-product-price="{{ cart_item.product.price }}">€{{ cart_item.sub_total }}</var>
-                <small class="text-muted"> {{ cart_item.product.price }}€/dia </small>
-            </div> <!-- price-wrap .// -->
-        </td>
-        <td class="text-right">
-        <a href="{% url 'remove_cart_item' cart_item.product.id cart_item.id %}" class="btn btn-danger"> Eliminar</a>
-        </td>
-    </tr>
-    {% endfor %}
-
-    </tbody>
-    </table>
-    </div> <!-- card.// -->
-
-        </aside> <!-- col.// -->
-        <aside class="col-lg-3">
-
-            <div class="card">
-            <div class="card-body">
-                <dl class="dlist-align">
-                  <dt>Precio Total:</dt>
-                  <dd class="text-right">{{ total }}€</dd>
-                </dl>
-                <dl class="dlist-align">
-                  <dt>Tasa combustible:</dt>
-                  <dd class="text-right"> {{ extra_combustible }}€</dd>
-                </dl>
-                <dl class="dlist-align">
-                    <dt>Impuesto IVA (21%):</dt>
-                    <dd class="text-right"> {{ tax }}€</dd>
-                  </dl>
-                <dl class="dlist-align">
-                  <dt>Total:</dt>
-                  <dd class="text-right text-dark b"><strong>{{ grand_total }}€</strong></dd>
-                </dl>
-                <hr>
-                <p class="text-center mb-3">
-                    <img src="{% static './images/misc/payments.png' %}" height="26">
-                </p>
-                <a href="{% url 'checkout' %}" class="btn btn-primary btn-block"> Pagar </a>
-            </div> <!-- card-body.// -->
-            </div> <!-- card.// -->
-
-    </aside> <!-- col.// -->
-
-
-    </div> <!-- row.// -->
-    <!-- ============================ COMPONENT 1 END .// ================================= -->
-    {% endif %}
+                </div> <!-- card.// -->
+            </aside> <!-- col.// -->
+            <aside class="col-lg-3">
+                <div class="card">
+                    <div class="card-body">
+                        <dl class="dlist-align">
+                            <dt>Precio Total:</dt>
+                            <dd class="text-right text-muted">{{ total }}€</dd>
+                        </dl>
+                        <dl class="dlist-align">
+                            <dt>Tasa combustible:
+                                <i class="fa fa-info-circle tooltip-icon" style="color: yellowgreen;" data-toggle="tooltip" title="La tasa de combustible puede variar según la embarcación y la duración del alquiler."></i>
+                            </dt>
+                            <dd class="text-right text-muted">{{ extra_combustible }}€</dd>
+                        </dl>
+                        <dl class="dlist-align">
+                            <dt>
+                                IVA (21%):
+                                <i class="fa fa-info-circle tooltip-icon" style="color: yellowgreen;" data-toggle="tooltip" title="Impuesto del 21% sobre el precio base."></i>
+                            </dt>                                                        
+                            <dd class="text-right text-muted">{{ tax }}€</dd>
+                        </dl>
+                        <dl class="dlist-align">
+                            <dt>Total:</dt>
+                            <dd class="text-right"><strong>{{ grand_total }}€</strong></dd>
+                        </dl>
+                        <hr>
+                        <p class="text-center mb-3">
+                            <img src="{% static './images/misc/payments.png' %}" height="26">
+                        </p>
+                        <a href="{% url 'checkout' %}" class="btn btn-primary btn-block"> Continuar con el Pago </a>
+                    </div> <!-- card-body.// -->
+                </div> <!-- card.// -->
+            </aside>
+        </div> <!-- row.// -->
+        <!-- ============================ COMPONENT 1 END .// ================================= -->
+        {% endif %}
     </div> <!-- container .//  -->
-    </section>
-    <!-- ========================= SECTION CONTENT END// ========================= -->
+</section>
+<!-- ========================= SECTION CONTENT END// ========================= -->
 {% endblock %}
 
 <script>

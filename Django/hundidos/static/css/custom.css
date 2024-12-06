@@ -112,3 +112,30 @@ ul.thumb li img {
   align-items: center;
 }
 
+/* Animación al pasar el mouse */
+.tooltip-icon {
+  transition: transform 0.3s ease, color 0.3s ease;
+}
+
+.tooltip-icon:hover {
+  transform: scale(1.2) rotate(10deg);
+  color: #007bff; /* Cambia el color a azul */
+}
+
+/* Agregar una animación de parpadeo al cargar la página */
+@keyframes wiggle {
+  0%, 100% {
+      transform: rotate(0deg);
+  }
+  25% {
+      transform: rotate(-5deg);
+  }
+  75% {
+      transform: rotate(5deg);
+  }
+}
+
+.tooltip-icon {
+  animation: wiggle 1s infinite;
+  animation-delay: 2s; /* Empieza 2 segundos después */
+}
