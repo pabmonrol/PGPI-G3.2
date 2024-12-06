@@ -185,7 +185,7 @@ def cart(request, total=0, duracion=0, cart_items=None):
 
     return render(request, 'store/cart.html', context)
 
-
+@user_passes_test(lambda u:  u.id is None or not u.is_admin)
 def checkout(request, total=0, duracion=0, cart_items=None):
     tax = 0
     grand_total = 0

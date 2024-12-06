@@ -276,14 +276,15 @@
                                   min="1" 
                                   max="{{ product.stock }}" 
                                   value="1" 
-                                  {% if not product.is_available or not product.stock and not product.id in unavailable_products %}disabled{% endif %}
+                                  {% if not product.is_available or not product.stock or product.id in unavailable_products %}disabled{% endif %}
                               >
                               <button 
                                   type="submit" 
                                   class="btn btn-block btn-success btn-sm"
-                                  {% if not product.is_available or not product.stock and not product.id in unavailable_products %}disabled{% endif %}
+                                  {% if not product.is_available or not product.stock or product.id in unavailable_products %}disabled{% endif %}
                               >
-                                  {% if product.is_available and product.stock and not product.id in unavailable_products %}Agregar al Carrito{% else %}No disponible{% endif %}
+                                  {% if not product.is_available or not product.stock or product.id in unavailable_products %}No disponible{% else %}Agregar al Carrito{% endif %}
+                                  
                               </button>
                           </div>
                       </form>
